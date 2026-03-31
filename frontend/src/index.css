@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+        border-radius: 4px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 4px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: rgba(0, 0, 0, 0.4);
+    }
+}
+
+@layer components {
+    .custom-html-table table {
+        @apply w-full text-left border-collapse text-sm;
+    }
+    
+    .custom-html-table th {
+        @apply bg-[#f4f4f2] text-[#111] font-semibold tracking-wider uppercase text-[11px] px-4 py-3 border-b border-[#111];
+    }
+    
+    .custom-html-table td {
+        @apply px-4 py-3 border-b border-[#eee] text-[#333] transition-colors whitespace-nowrap;
+    }
+    
+    .custom-html-table tbody tr:hover td {
+        @apply bg-[#fafafa];
+    }
+    
+    .custom-html-table tbody tr:last-child td {
+        @apply border-0;
+    }
+}
+
+body {
+    @apply bg-[#f4f4f2] text-[#111111] antialiased selection:bg-[#111] selection:text-[#f4f4f2];
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}

@@ -1,0 +1,35 @@
+from typing import TypedDict, List, Dict, Any, Optional
+
+class GraphState(TypedDict):
+    # --- Inputs ---
+    project_id: str
+    user_question: str
+    rewritten_question: str            # after rewriting
+    
+    # --- Entity Resolution ---
+    detected_entities: List[Dict[str, Any]]
+    resolved_entities: List[Dict[str, Any]]
+
+    # --- Retrieved context ---
+    candidate_tables: List[Dict[str, Any]]       # from vector search
+    selected_tables: List[str]                   # after LLM filtering
+    table_metadata: List[Dict[str, Any]]         # full column-level schema
+    applicable_rules: List[str]                  # global domain rules
+    table_rules: Dict[str, List[str]]            # per-table rules (table_name -> rules)
+    join_paths: List[Dict[str, Any]]             # ordered join sequence from Neo4j
+
+    # --- Pruned context ---
+    pruned_columns: Dict[str, List[str]]         # only question-relevant columns (table -> columns)
+
+    # --- Outputs ---
+    generated_sql: str
+    query_result: Any                  # query result (list of dicts or error info)
+    result_summary: str                # natural language answer
+
+    # --- Control flow ---
+    error_details: str
+    retry_count: int                   # max 2 retries for SQL regeneration
+    current_node: str
+    
+    # --- Verification ---
+    confidence_flags: List[str]        # warnings from verification layers

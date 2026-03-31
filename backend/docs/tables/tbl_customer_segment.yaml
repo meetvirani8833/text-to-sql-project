@@ -1,0 +1,68 @@
+table_name: "tbl_customer_segment"
+
+table_description: |
+  Pick tbl_customer_segment when the user asks to group, filter, or compare
+  data by customer loyalty tier or spend level. Typical triggers: 'by segment',
+  'Gold customers', 'Platinum tier', 'which segment spends the most', 'segment
+  breakdown', 'Bronze vs Silver'. tbl_customer_segment is a lookup/dimension
+  table. To reach order or revenue data, also include tbl_customer and
+  tbl_order. To see which customers belong to a segment, include tbl_customer.
+  Do NOT pick this table if the user asks about product categories — 'Gold
+  Collection' is a product category in tbl_product_category, not a customer
+  segment. Only pick this table when the user refers to a customer tier or
+  loyalty level.
+
+primary_key: "segment_id"
+
+columns:
+  - name: "segment_id"
+    description: |
+      Primary key integer. JOIN key: tbl_customer.segment_id =
+      tbl_customer_segment.segment_id. Always include when joining this table
+      to tbl_customer.
+
+  - name: "segment_name"
+    description: |
+      DISPLAY + FILTER + GROUP BY column. The loyalty tier label. Values:
+      'Bronze', 'Silver', 'Gold', 'Platinum' (ordered low to high by spend).
+      Use in SELECT and GROUP BY for segment-level aggregations. Use in WHERE
+      after entity resolution (e.g. WHERE tbl_customer_segment.segment_name =
+      'Gold'). NOTE: 'Gold' here is a customer loyalty tier — it is NOT the
+      same as the 'Gold Collection' product category in tbl_product_category.
+
+  - name: "segment_code"
+    description: |
+      Short code: 'BRZ' (Bronze), 'SLV' (Silver), 'GLD' (Gold), 'PLT'
+      (Platinum). Include in SELECT when the user wants codes. Can substitute
+      for segment_name in WHERE if user provides a code.
+
+  - name: "min_annual_spend"
+    description: |
+      DISPLAY column. Minimum annual spend in INR to qualify for this tier.
+      Include in SELECT when user asks about tier thresholds or qualification
+      criteria. Do not use in WHERE for filtering orders or customers.
+
+  - name: "max_annual_spend"
+    description: |
+      DISPLAY column. Maximum annual spend in INR for this tier. NULL for
+      Platinum (no upper bound). Include in SELECT when user asks about tier
+      ranges. Do not use in WHERE.
+
+  - name: "status"
+    description: |
+      FILTER column. 1 = Active segment, 0 = Inactive. All four segments are
+      currently active. Always add WHERE status = 1 unless inactive segments
+      are explicitly requested.
+
+rules:
+  - "Always filter WHERE status = 1."
+  - "GROUP BY segment_name for segment-level aggregations."
+  - "'Gold' segment_name is the customer tier. 'Gold Collection' category_name
+    in tbl_product_category is the jewellery product line. Never confuse them."
+  - "Tier order from lowest to highest spend: Bronze < Silver < Gold < Platinum."
+
+relationships:
+  - column: "segment_id"
+    target_table: "tbl_customer"
+    target_column: "segment_id"
+    note: "One segment classifies many customers."

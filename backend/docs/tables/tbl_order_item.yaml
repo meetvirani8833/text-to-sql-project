@@ -1,0 +1,85 @@
+table_name: "tbl_order_item"
+
+table_description: |
+  Pick tbl_order_item when the user needs revenue, quantity, or discount data
+  broken down by individual product or product category. Typical triggers:
+  'revenue by product', 'revenue by category', 'best-selling product',
+  'top category by sales', 'units sold per product', 'average discount by
+  category', 'which product generates the most revenue'. tbl_order_item holds
+  one row per product per order — it is the most granular revenue source.
+  Always include tbl_order alongside tbl_order_item so that cancelled orders
+  can be excluded via tbl_order.order_status != 5. For product names join to
+  tbl_product. For category names join through tbl_product to tbl_product_category.
+  For customer or region data join through tbl_order to tbl_customer to tbl_region.
+  Do NOT pick tbl_order_item for order-level totals or order counts — use
+  tbl_order and its total_amount column for those.
+
+primary_key: "item_id"
+
+columns:
+  - name: "item_id"
+    description: |
+      Primary key integer. Uniquely identifies a line item. Include in SELECT
+      only if the user needs the raw line-item ID. Usually omitted from results.
+
+  - name: "order_id"
+    description: |
+      Foreign key to tbl_order. JOIN key:
+        tbl_order_item.order_id = tbl_order.order_id
+      Always include when joining to tbl_order (required for filtering
+      cancelled orders via order_status != 5).
+
+  - name: "product_id"
+    description: |
+      Foreign key to tbl_product. JOIN key:
+        tbl_order_item.product_id = tbl_product.product_id
+      Always include when joining to tbl_product (for product names, SKUs,
+      categories, or status).
+
+  - name: "quantity"
+    description: |
+      DISPLAY + COMPUTATION column. Number of units sold in this line item.
+      Use SUM(quantity) for total units sold per product or category. Include
+      in SELECT when user asks about units sold or volume.
+
+  - name: "unit_price"
+    description: |
+      DISPLAY column. Actual per-unit price charged at time of sale in INR.
+      May differ from tbl_product.unit_price (catalogue price) due to
+      promotions. Include in SELECT when user asks for the sale price of
+      individual items. Do NOT use this column for revenue calculations —
+      use line_total instead.
+
+  - name: "discount_pct"
+    description: |
+      DISPLAY + COMPUTATION column. Percentage discount applied to this line
+      item (0, 5, 10, 15, or 20). Include in SELECT when user asks about
+      discounts. Use AVG(discount_pct) for average discount analysis. Use in
+      WHERE to filter by discount level (e.g. 'orders with discounts' →
+      WHERE discount_pct > 0).
+
+  - name: "line_total"
+    description: |
+      COMPUTATION column. Pre-computed revenue for this line item in INR.
+      Formula: quantity × unit_price × (1 − discount_pct / 100). Use
+      SUM(line_total) for any product-level or category-level revenue
+      aggregation. Always join to tbl_order and add WHERE tbl_order.order_status
+      != 5 to exclude cancelled orders from totals. Do NOT recompute this
+      formula inline — use the column directly.
+
+rules:
+  - "Always join tbl_order_item to tbl_order and add WHERE
+    tbl_order.order_status != 5 in any revenue query."
+  - "Use SUM(line_total) for product-level or category-level revenue totals."
+  - "Use SUM(quantity) for total units sold."
+  - "Never use unit_price for revenue calculations — use line_total."
+  - "For category-level revenue, join through tbl_product to
+    tbl_product_category, then GROUP BY category_name."
+
+relationships:
+  - column: "order_id"
+    target_table: "tbl_order"
+    target_column: "order_id"
+  - column: "product_id"
+    target_table: "tbl_product"
+    target_column: "product_id"

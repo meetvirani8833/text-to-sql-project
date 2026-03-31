@@ -1,0 +1,50 @@
+rules:
+  # ── STATUS FILTERING ──────────────────────────────────────────────────────
+  - "Always add WHERE status = 1 on tbl_customer, tbl_product, tbl_region,
+    tbl_sales_rep, tbl_product_category, and tbl_customer_segment unless the
+    user explicitly asks for inactive, churned, or discontinued records."
+
+  # ── REVENUE / SALES CALCULATIONS ─────────────────────────────────────────
+  - "Always exclude cancelled orders from revenue and sales calculations by
+    adding WHERE tbl_order.order_status != 5 unless the user explicitly
+    requests cancelled order data."
+  - "For order-level revenue totals use SUM(tbl_order.total_amount).
+    For line-item-level revenue broken down by product or category use
+    SUM(tbl_order_item.line_total). Never mix the two in the same aggregation."
+  - "Use tbl_order_item.line_total directly for revenue — do NOT recompute it
+    as quantity * unit_price * (1 - discount_pct / 100) unless the user
+    explicitly requests a recalculation."
+
+  # ── ORDER STATUS CODES ────────────────────────────────────────────────────
+  - "tbl_order.order_status codes: 1=Pending, 2=Confirmed, 3=Shipped,
+    4=Delivered, 5=Cancelled. Active orders = IN (1,2,3).
+    Completed orders = 4. Cancelled = 5."
+
+  # ── YEAR / TIME FILTERING ─────────────────────────────────────────────────
+  - "For any year-based order filtering use tbl_order.fiscal_year = <year>.
+    Never use YEAR(tbl_order.order_date) — fiscal_year is the pre-computed
+    column and must always be used instead."
+  - "Use tbl_customer.cohort_year only when the user asks about the year a
+    customer was acquired ('2022 cohort', 'customers from 2023'). Do not use
+    cohort_year for filtering orders by year."
+
+  # ── JOIN RULES ────────────────────────────────────────────────────────────
+  - "Never invent JOIN paths. Use only FK->PK pairs from JOIN_PATHS."
+  - "To reach region or zone from an order: tbl_order -> tbl_customer ->
+    tbl_region -> tbl_zone."
+  - "To reach segment from an order: tbl_order -> tbl_customer ->
+    tbl_customer_segment."
+  - "To reach category from an order line item: tbl_order_item -> tbl_product
+    -> tbl_product_category."
+
+  # ── SELECT / OUTPUT RULES ─────────────────────────────────────────────────
+  - "Never use SELECT *. Always list column names explicitly."
+  - "Always LIMIT to 1000 rows unless the query returns a single aggregated
+    value (a total, count, or average)."
+
+  # ── AGGREGATION PATTERNS ──────────────────────────────────────────────────
+  - "For 'which X has the most/highest/top' questions: GROUP BY the dimension
+    column, aggregate the metric with SUM or COUNT, ORDER BY metric DESC,
+    LIMIT to 1 or N."
+  - "For 'how many' questions generate COUNT. For 'total revenue/sales'
+    questions generate SUM on the appropriate revenue column."

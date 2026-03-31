@@ -1,0 +1,66 @@
+table_name: "tbl_product_category"
+
+table_description: |
+  Pick tbl_product_category when the user asks to group, filter, or compare
+  data by product line or merchandise category. Typical triggers: 'by category',
+  'Electronics revenue', 'which category sells the most', 'Apparel products',
+  'category breakdown', 'Gold Collection sales'. tbl_product_category sits
+  above tbl_product in the product hierarchy. To reach sales or revenue data,
+  also include tbl_product, tbl_order_item, and tbl_order (in that order).
+  Do NOT pick this table if the user is asking about customer loyalty tiers —
+  'Gold' as a customer tier lives in tbl_customer_segment, not here.
+
+primary_key: "category_id"
+
+columns:
+  - name: "category_id"
+    description: |
+      Primary key integer. JOIN key: tbl_product.category_id =
+      tbl_product_category.category_id. Always include when joining this table
+      to tbl_product.
+
+  - name: "category_name"
+    description: |
+      DISPLAY + FILTER + GROUP BY column. The product line label. Values:
+      'Electronics', 'Apparel', 'Home & Living', 'Gold Collection',
+      'Sports & Fitness', 'Beauty & Wellness'. Use in SELECT and GROUP BY
+      for category-level aggregations. Use in WHERE after entity resolution
+      (e.g. WHERE tbl_product_category.category_name = 'Gold Collection').
+      NOTE: 'Gold Collection' is a jewellery product line, not the 'Gold'
+      customer loyalty tier in tbl_customer_segment.
+
+  - name: "category_code"
+    description: |
+      Short code: 'ELEC', 'APRL', 'HLV', 'GCOL', 'SPF', 'BWL'. Include in
+      SELECT when user asks for codes. Can substitute for category_name in
+      WHERE if user provides a code.
+
+  - name: "parent_category_id"
+    description: |
+      Self-referential FK for category hierarchy. NULL means top-level category.
+      All 6 current categories are top-level (NULL). Include only if user asks
+      about category hierarchy or sub-categories.
+
+  - name: "status"
+    description: |
+      FILTER column. 1 = Active category, 0 = Discontinued. All 6 are active.
+      Always add WHERE status = 1 unless discontinued categories are requested.
+      When joining for revenue analysis, do NOT filter tbl_product_category by
+      status so that historical sales of discontinued categories are included.
+
+rules:
+  - "Always filter WHERE status = 1 when listing or searching categories."
+  - "For revenue analysis, omit the status filter on tbl_product_category so
+    historical orders against discontinued categories are captured."
+  - "GROUP BY category_name for category-level revenue aggregations."
+  - "'Gold Collection' is a product category — not the 'Gold' customer segment."
+
+relationships:
+  - column: "parent_category_id"
+    target_table: "tbl_product_category"
+    target_column: "category_id"
+    note: "Self-referential FK for sub-category hierarchy."
+  - column: "category_id"
+    target_table: "tbl_product"
+    target_column: "category_id"
+    note: "One category contains many products."

@@ -1,0 +1,23 @@
+table_name: ""
+table_description: |
+  # Describe what this table stores, its business purpose,
+  # and any important relationships.
+  <FILL IN>
+
+columns:
+  - name: ""                   # exact column name
+    description: |
+      <FILL IN>
+  # Repeat for every column you want documented.
+  # Columns not listed here will still be introspected from MySQL
+  # but will receive auto-generated descriptions only.
+
+rules:
+  # Optional domain-specific rules for this table.
+  # These are injected into LLM prompts at runtime.
+  - ""
+
+relationships:
+  # Optional domain-specific relationships for this table.
+  # These are injected into LLM prompts at runtime.
+  - ""

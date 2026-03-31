@@ -1,0 +1,21 @@
+{
+  "timestamp": "2026-03-31T11:52:06.120211",
+  "completed_entities": [
+    "region_name",
+    "zone_name",
+    "segment_name",
+    "category_name",
+    "product_name",
+    "rep_name"
+  ],
+  "total_entities": [
+    "region_name",
+    "zone_name",
+    "segment_name",
+    "category_name",
+    "product_name",
+    "rep_name"
+  ],
+  "current_entity": null,
+  "progress": "6/6"
+}

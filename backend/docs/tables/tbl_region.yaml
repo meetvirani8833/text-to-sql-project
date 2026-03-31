@@ -1,0 +1,66 @@
+table_name: "tbl_region"
+
+table_description: |
+  Pick tbl_region when the user asks to group, filter, or compare data by
+  geographic region. Typical triggers: 'by region', 'per region', 'in the
+  North region', 'which region has the most/least', 'region-level revenue/
+  customers/orders/reps'. tbl_region is the second level of the geography
+  hierarchy, sitting between tbl_zone (parent) and tbl_customer / tbl_sales_rep
+  (children). To reach order or revenue data from here, also include tbl_customer
+  and tbl_order. To reach zone-level data, also include tbl_zone. Do NOT pick
+  tbl_region if the user asks only about zones, products, or segments with no
+  regional breakdown.
+
+primary_key: "region_id"
+
+columns:
+  - name: "region_id"
+    description: |
+      Primary key integer. JOIN key used in:
+        tbl_customer.region_id = tbl_region.region_id (to link customers to regions)
+        tbl_sales_rep.region_id = tbl_region.region_id (to link reps to regions)
+      Always include when joining tbl_region to tbl_customer or tbl_sales_rep.
+
+  - name: "region_name"
+    description: |
+      DISPLAY + FILTER + GROUP BY column. Human-readable region label. Use in
+      SELECT and GROUP BY for regional aggregations. Use in WHERE after entity
+      resolution supplies the canonical name (e.g. WHERE tbl_region.region_name
+      = 'North Central Region'). Values include: 'North Region', 'North Central
+      Region', 'South Region', 'South Coastal Region', 'East Region',
+      'East Metropolitan Region', 'West Region'. 'North Region' and 'North
+      Central Region' are two distinct regions — never conflate them.
+
+  - name: "region_code"
+    description: |
+      Short code ('NR', 'NCR', 'SR', 'SCR', 'ER', 'EMR', 'WR', 'WHR').
+      Include in SELECT when user requests codes. Can substitute for
+      region_name in WHERE if user provides a code.
+
+  - name: "zone_id"
+    description: |
+      Foreign key to tbl_zone. JOIN key: tbl_region.zone_id = tbl_zone.zone_id.
+      Include when the query needs to traverse up to zone-level data.
+
+  - name: "status"
+    description: |
+      FILTER column. 1 = Active region, 0 = Inactive. 'West Highland Region'
+      is currently inactive (status=0). Always add WHERE tbl_region.status = 1
+      unless inactive regions are explicitly requested.
+
+rules:
+  - "Always filter WHERE status = 1 unless inactive regions are requested."
+  - "GROUP BY region_name (not region_id) so results display the region label."
+  - "Never equate 'North Region' with 'North Central Region' — they are
+    separate rows with different region_id values."
+
+relationships:
+  - column: "zone_id"
+    target_table: "tbl_zone"
+    target_column: "zone_id"
+  - column: "region_id"
+    target_table: "tbl_customer"
+    target_column: "region_id"
+  - column: "region_id"
+    target_table: "tbl_sales_rep"
+    target_column: "region_id"

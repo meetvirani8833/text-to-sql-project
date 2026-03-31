@@ -1,0 +1,59 @@
+entities:
+
+  region_name:
+    table: tbl_region
+    name_column: region_name
+    alias_columns:
+      - region_code
+    description: "Sales region name grouping customers and reps geographically
+      (e.g. 'North Region', 'North Central Region', 'South Coastal Region',
+      'East Metropolitan Region', 'West Region')."
+    filter_condition: "status = 1"
+
+  zone_name:
+    table: tbl_zone
+    name_column: zone_name
+    alias_columns:
+      - zone_code
+    description: "High-level geographic sales zone that contains multiple regions
+      (e.g. 'North Zone', 'South Zone', 'East Zone', 'West Zone')."
+    filter_condition: "status = 1"
+
+  segment_name:
+    table: tbl_customer_segment
+    name_column: segment_name
+    alias_columns:
+      - segment_code
+    description: "Customer loyalty and spend tier name indicating purchase value
+      level (e.g. 'Bronze', 'Silver', 'Gold', 'Platinum')."
+    filter_condition: "status = 1"
+
+  category_name:
+    table: tbl_product_category
+    name_column: category_name
+    alias_columns:
+      - category_code
+    description: "Product line or merchandise category grouping related products
+      for sale (e.g. 'Electronics', 'Apparel', 'Home & Living',
+      'Gold Collection', 'Sports & Fitness', 'Beauty & Wellness')."
+    filter_condition: "status = 1"
+
+  product_name:
+    table: tbl_product
+    name_column: product_name
+    alias_columns:
+      - product_sku
+    description: "Full name of an individual product available for sale
+      (e.g. 'Sony 4K Smart TV 55\"', 'Apple MacBook Air M2',
+      '18K Gold Chain Necklace', 'Yoga Mat Premium')."
+    filter_condition: "status = 1"
+
+  rep_name:
+    table: tbl_sales_rep
+    name_column: rep_name
+    alias_columns:
+      - rep_email
+    description: "Full name of a sales representative or regional manager
+      responsible for customer accounts and orders
+      (e.g. 'Arjun Sharma', 'Priya Menon', 'Rohit Verma', 'Sneha Kapoor')."
+    filter_condition: "status = 1"

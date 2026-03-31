@@ -1,0 +1,49 @@
+table_name: "tbl_zone"
+
+table_description: |
+  Pick tbl_zone when the user asks to group, filter, or compare data at the
+  broadest geographic level (zone). Typical triggers: 'by zone', 'per zone',
+  'which zone has the most/least', 'zone-level revenue/customers/orders'.
+  tbl_zone sits at the top of the geography hierarchy. To reach sales or order
+  data from here, also include tbl_region, tbl_customer, and tbl_order in that
+  order. To reach product or line-item data, further include tbl_order_item.
+  Do NOT pick tbl_zone if the user asks only about regions, customers, or
+  products with no mention of zone-level grouping.
+
+primary_key: "zone_id"
+
+columns:
+  - name: "zone_id"
+    description: |
+      Primary key integer. Use in JOIN ON tbl_zone.zone_id = tbl_region.zone_id
+      to connect zones to their regions. Include in SELECT only if the user
+      needs the raw ID; otherwise prefer zone_name.
+
+  - name: "zone_name"
+    description: |
+      DISPLAY + GROUP BY column. The human-readable zone label used in SELECT
+      and GROUP BY for geographic aggregations. Values: 'North Zone',
+      'South Zone', 'East Zone', 'West Zone'. Use in WHERE only when the user
+      explicitly names a zone (after entity resolution resolves it here).
+
+  - name: "zone_code"
+    description: |
+      Short code for the zone ('NZ', 'SZ', 'EZ', 'WZ'). Include in SELECT
+      when the user asks for codes or abbreviations. Can be used in WHERE as
+      an alternative to zone_name if the user supplies a code.
+
+  - name: "status"
+    description: |
+      FILTER column. 1 = Active zone, 0 = Inactive zone. Always add
+      WHERE tbl_zone.status = 1 unless the user explicitly asks for
+      inactive zones.
+
+rules:
+  - "Always filter WHERE status = 1 unless inactive zones are requested."
+  - "GROUP BY zone_name when aggregating any metric by zone."
+
+relationships:
+  - column: "zone_id"
+    target_table: "tbl_region"
+    target_column: "zone_id"
+    note: "One zone contains many regions."

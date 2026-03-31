@@ -1,0 +1,93 @@
+table_name: "tbl_order"
+
+table_description: |
+  Pick tbl_order for any question involving orders, revenue, sales totals,
+  order counts, rep performance, or time-based analysis. Typical triggers:
+  'total revenue', 'total sales', 'how many orders', 'orders in 2024',
+  'delivered orders', 'cancelled orders', 'orders per rep', 'orders per
+  customer', 'revenue by year', 'monthly sales', 'best performing rep'.
+  tbl_order is the primary transaction table. For order-level totals use
+  total_amount. For line-item-level breakdowns (by product or category) also
+  include tbl_order_item. To reach region, zone, or segment data join through
+  tbl_customer. To reach rep data join to tbl_sales_rep. Always include
+  tbl_order whenever revenue, order counts, or sales metrics are involved.
+
+primary_key: "order_id"
+
+columns:
+  - name: "order_id"
+    description: |
+      Primary key integer. JOIN key used in:
+        tbl_order_item.order_id = tbl_order.order_id (to reach line items)
+      Always include when joining tbl_order to tbl_order_item.
+
+  - name: "customer_id"
+    description: |
+      Foreign key to tbl_customer. JOIN key:
+        tbl_order.customer_id = tbl_customer.customer_id
+      Always include when the query needs to reach customer, region, zone,
+      or segment data from orders.
+
+  - name: "rep_id"
+    description: |
+      Foreign key to tbl_sales_rep. JOIN key:
+        tbl_order.rep_id = tbl_sales_rep.rep_id
+      Always include when grouping or filtering orders by sales representative.
+
+  - name: "order_date"
+    description: |
+      DISPLAY column. The exact date the order was placed (YYYY-MM-DD). Include
+      in SELECT when showing individual order records. Do NOT use YEAR(order_date)
+      for year-based filtering — use fiscal_year instead.
+
+  - name: "fiscal_year"
+    description: |
+      FILTER + DISPLAY + GROUP BY column. Pre-computed calendar year of the
+      order (e.g. 2022, 2023, 2024). Use in WHERE for year-based filtering
+      (e.g. 'orders in 2024' → WHERE fiscal_year = 2024, 'last year' →
+      WHERE fiscal_year = YEAR(CURDATE()) - 1). Use in GROUP BY for annual
+      trend analysis. Always prefer this over YEAR(order_date).
+
+  - name: "dispatch_date"
+    description: |
+      DISPLAY column. Date the order was dispatched (YYYY-MM-DD). NULL if the
+      order has not shipped (status 1 or 2) or was cancelled (status 5).
+      Include in SELECT when user asks about dispatch or shipping dates. Do NOT
+      use dispatch_date IS NULL as a proxy for cancellation — use order_status
+      = 5 for that.
+
+  - name: "order_status"
+    description: |
+      FILTER column. Integer code for order state:
+        1 = Pending, 2 = Confirmed, 3 = Shipped, 4 = Delivered, 5 = Cancelled.
+      Always include in SELECT and WHERE for any status-related filtering.
+      CRITICAL: Always add WHERE order_status != 5 in any revenue or sales
+      total query to exclude cancelled orders. 'Active orders' → IN (1,2,3).
+      'Completed' → = 4. 'Cancelled' → = 5.
+
+  - name: "total_amount"
+    description: |
+      COMPUTATION column. Pre-computed order total in INR (sum of all line items
+      for this order). Use SUM(total_amount) for order-level revenue aggregations.
+      Always pair with WHERE order_status != 5 to exclude cancelled orders from
+      totals. Do NOT use this for per-product or per-category revenue — use
+      tbl_order_item.line_total for those breakdowns.
+
+rules:
+  - "Every revenue or sales-total query MUST include WHERE order_status != 5."
+  - "Use fiscal_year for year filtering, never YEAR(order_date)."
+  - "Use SUM(total_amount) for order-level revenue totals."
+  - "For per-product or per-category revenue, join to tbl_order_item and use
+    SUM(line_total) instead of SUM(total_amount)."
+  - "dispatch_date IS NULL does NOT mean cancelled — check order_status = 5."
+
+relationships:
+  - column: "customer_id"
+    target_table: "tbl_customer"
+    target_column: "customer_id"
+  - column: "rep_id"
+    target_table: "tbl_sales_rep"
+    target_column: "rep_id"
+  - column: "order_id"
+    target_table: "tbl_order_item"
+    target_column: "order_id"
