@@ -79,10 +79,15 @@ if settings.LANGSMITH_API_KEY:
 
 app = FastAPI(title="Curriculum Agent API", lifespan=lifespan)
 
-# Add CORS middleware for local frontend dev server
+# Add CORS middleware for local frontend dev server and production frontend
+frontend_url = os.environ.get("FRONTEND_URL", "")
+origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
+if frontend_url:
+    origins.append(frontend_url)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

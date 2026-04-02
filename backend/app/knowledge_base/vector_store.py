@@ -7,10 +7,13 @@ from app.dependencies import get_embeddings
 # Connection string for PGVector (sync psycopg3)
 # postgresql+psycopg://user:password@host:port/db
 def get_pgvector_connection_string():
-    return (
+    base = (
         f"postgresql+psycopg://{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}@"
         f"{settings.POSTGRES_HOST}:{settings.POSTGRES_PORT}/{settings.POSTGRES_DB}"
     )
+    if settings.POSTGRES_SSLMODE:
+        return f"{base}?sslmode={settings.POSTGRES_SSLMODE}"
+    return base
 
 def get_vector_store():
     return PGVector(
