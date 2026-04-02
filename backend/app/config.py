@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     POSTGRES_USER: str = "curriculum"
     POSTGRES_PASSWORD: str = ""
     POSTGRES_DB: str = "curriculum_kb"
+    POSTGRES_SSLMODE: str = ""
 
     # Neo4j
     NEO4J_URI: str = "bolt://localhost:7687"

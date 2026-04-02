@@ -6,10 +6,13 @@ from app.knowledge_base.models import Base
 # Postgres Connection String
 # postgresql+asyncpg://user:password@host:port/db
 def get_postgres_url():
-    return (
+    base = (
         f"postgresql+asyncpg://{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}@"
         f"{settings.POSTGRES_HOST}:{settings.POSTGRES_PORT}/{settings.POSTGRES_DB}"
     )
+    if settings.POSTGRES_SSLMODE:
+        return f"{base}?ssl={settings.POSTGRES_SSLMODE}"
+    return base
 
 engine = create_async_engine(get_postgres_url(), echo=False)
 AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
