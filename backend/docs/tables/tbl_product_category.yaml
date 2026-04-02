@@ -14,12 +14,14 @@ primary_key: "category_id"
 
 columns:
   - name: "category_id"
+    visualization_name: "Category ID"
     description: |
       Primary key integer. JOIN key: tbl_product.category_id =
       tbl_product_category.category_id. Always include when joining this table
       to tbl_product.
 
   - name: "category_name"
+    visualization_name: "Category Name"
     description: |
       DISPLAY + FILTER + GROUP BY column. The product line label. Values:
       'Electronics', 'Apparel', 'Home & Living', 'Gold Collection',
@@ -30,18 +32,21 @@ columns:
       customer loyalty tier in tbl_customer_segment.
 
   - name: "category_code"
+    visualization_name: "Category Code"
     description: |
       Short code: 'ELEC', 'APRL', 'HLV', 'GCOL', 'SPF', 'BWL'. Include in
       SELECT when user asks for codes. Can substitute for category_name in
       WHERE if user provides a code.
 
   - name: "parent_category_id"
+    visualization_name: "Parent Category ID"
     description: |
       Self-referential FK for category hierarchy. NULL means top-level category.
       All 6 current categories are top-level (NULL). Include only if user asks
       about category hierarchy or sub-categories.
 
   - name: "status"
+    visualization_name: "Category Status"
     description: |
       FILTER column. 1 = Active category, 0 = Discontinued. All 6 are active.
       Always add WHERE status = 1 unless discontinued categories are requested.

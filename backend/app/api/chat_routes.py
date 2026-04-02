@@ -20,7 +20,9 @@ class ChatResponse(BaseModel):
     Agent_response: str
     markdown: Optional[str] = None
     spreadsheet_structure: Optional[str] = None
-    generated_sql: Optional[str] = None
+    query_result: Optional[List[Dict[str, Any]]] = None
+    visualization_config: Optional[Dict[str, Any]] = None
+    clarification_options: Optional[List[str]] = None
     history: List[Dict[str, Any]]
 
 def convert_to_html_table(data_arr: List[Dict[str, Any]]) -> Optional[str]:
@@ -156,12 +158,16 @@ async def chat_endpoint(req: ChatRequest):
                 else:
                     msg_header = "Please clarify:"
             
-            # Formatting options for the user
-            formatted_opts = ""
+            # Formatting options for the user as list
+            display_options = []
             for i, opt in enumerate(options):
-                formatted_opts += f"\n{i+1}. {opt}"
+                display_opt = str(opt)
+                if interrupt_type == "type":
+                    # Beautify raw entity types: 'segment_name' -> 'Segment Name'
+                    display_opt = display_opt.replace('_', ' ').title()
+                display_options.append(display_opt)
                 
-            agent_text = f"{msg_header}{formatted_opts}"
+            agent_text = msg_header
             
             new_history = list(req.history)
             if not new_history:
@@ -173,6 +179,7 @@ async def chat_endpoint(req: ChatRequest):
                 conversation_id=conversation_id,
                 status="awaiting_clarification",
                 Agent_response=agent_text,
+                clarification_options=display_options,
                 history=new_history
             )
 
@@ -201,6 +208,8 @@ async def chat_endpoint(req: ChatRequest):
         new_history.append({"user": req.text})
         new_history.append({"system": agent_text})
         
+        viz_config = final_state_vals.get("visualization_config")
+        
         return ChatResponse(
             conversation_id=conversation_id,
             status=status,
@@ -208,6 +217,8 @@ async def chat_endpoint(req: ChatRequest):
             markdown=markdown,
             spreadsheet_structure=html_table,
             generated_sql=sql,
+            query_result=query_result if query_result is not None else [],
+            visualization_config=viz_config,
             history=new_history
         )
         

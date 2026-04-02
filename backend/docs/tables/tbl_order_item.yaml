@@ -18,11 +18,13 @@ primary_key: "item_id"
 
 columns:
   - name: "item_id"
+    visualization_name: "Item ID"
     description: |
       Primary key integer. Uniquely identifies a line item. Include in SELECT
       only if the user needs the raw line-item ID. Usually omitted from results.
 
   - name: "order_id"
+    visualization_name: "Order ID"
     description: |
       Foreign key to tbl_order. JOIN key:
         tbl_order_item.order_id = tbl_order.order_id
@@ -30,6 +32,7 @@ columns:
       cancelled orders via order_status != 5).
 
   - name: "product_id"
+    visualization_name: "Product ID"
     description: |
       Foreign key to tbl_product. JOIN key:
         tbl_order_item.product_id = tbl_product.product_id
@@ -37,12 +40,14 @@ columns:
       categories, or status).
 
   - name: "quantity"
+    visualization_name: "Quantity"
     description: |
       DISPLAY + COMPUTATION column. Number of units sold in this line item.
       Use SUM(quantity) for total units sold per product or category. Include
       in SELECT when user asks about units sold or volume.
 
   - name: "unit_price"
+    visualization_name: "Unit Price (INR)"
     description: |
       DISPLAY column. Actual per-unit price charged at time of sale in INR.
       May differ from tbl_product.unit_price (catalogue price) due to
@@ -51,6 +56,7 @@ columns:
       use line_total instead.
 
   - name: "discount_pct"
+    visualization_name: "Discount (%)"
     description: |
       DISPLAY + COMPUTATION column. Percentage discount applied to this line
       item (0, 5, 10, 15, or 20). Include in SELECT when user asks about
@@ -59,6 +65,7 @@ columns:
       WHERE discount_pct > 0).
 
   - name: "line_total"
+    visualization_name: "Line Total (INR)"
     description: |
       COMPUTATION column. Pre-computed revenue for this line item in INR.
       Formula: quantity × unit_price × (1 − discount_pct / 100). Use

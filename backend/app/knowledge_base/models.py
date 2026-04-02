@@ -81,6 +81,7 @@ class ColumnMeta(Base):
     
     user_description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     generated_explanation: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    visualization_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

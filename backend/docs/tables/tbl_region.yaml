@@ -15,6 +15,7 @@ primary_key: "region_id"
 
 columns:
   - name: "region_id"
+    visualization_name: "Region ID"
     description: |
       Primary key integer. JOIN key used in:
         tbl_customer.region_id = tbl_region.region_id (to link customers to regions)
@@ -22,6 +23,7 @@ columns:
       Always include when joining tbl_region to tbl_customer or tbl_sales_rep.
 
   - name: "region_name"
+    visualization_name: "Region Name"
     description: |
       DISPLAY + FILTER + GROUP BY column. Human-readable region label. Use in
       SELECT and GROUP BY for regional aggregations. Use in WHERE after entity
@@ -32,17 +34,20 @@ columns:
       Central Region' are two distinct regions — never conflate them.
 
   - name: "region_code"
+    visualization_name: "Region Code"
     description: |
       Short code ('NR', 'NCR', 'SR', 'SCR', 'ER', 'EMR', 'WR', 'WHR').
       Include in SELECT when user requests codes. Can substitute for
       region_name in WHERE if user provides a code.
 
   - name: "zone_id"
+    visualization_name: "Zone ID"
     description: |
       Foreign key to tbl_zone. JOIN key: tbl_region.zone_id = tbl_zone.zone_id.
       Include when the query needs to traverse up to zone-level data.
 
   - name: "status"
+    visualization_name: "Region Status"
     description: |
       FILTER column. 1 = Active region, 0 = Inactive. 'West Highland Region'
       is currently inactive (status=0). Always add WHERE tbl_region.status = 1

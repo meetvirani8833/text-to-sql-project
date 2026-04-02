@@ -17,24 +17,28 @@ primary_key: "customer_id"
 
 columns:
   - name: "customer_id"
+    visualization_name: "Customer ID"
     description: |
       Primary key integer. Central JOIN key used in:
         tbl_order.customer_id = tbl_customer.customer_id (orders → customer)
       Always include when joining tbl_customer to tbl_order.
 
   - name: "customer_name"
+    visualization_name: "Full Name"
     description: |
       DISPLAY column. Full name of the customer. Include in SELECT when the
       user wants to see individual customer names in results. Use in GROUP BY
       only for per-customer breakdowns.
 
   - name: "customer_code"
+    visualization_name: "Customer Code"
     description: |
       DISPLAY + FILTER column. Unique customer reference code ('CUST-0001').
       Include in SELECT when user asks for customer codes or IDs. Use in WHERE
       if user identifies a customer by code.
 
   - name: "region_id"
+    visualization_name: "Region ID"
     description: |
       Foreign key to tbl_region. JOIN key:
         tbl_customer.region_id = tbl_region.region_id
@@ -42,6 +46,7 @@ columns:
       or geography. This is the bridge from orders to geographic data.
 
   - name: "segment_id"
+    visualization_name: "Segment ID"
     description: |
       Foreign key to tbl_customer_segment. JOIN key:
         tbl_customer.segment_id = tbl_customer_segment.segment_id
@@ -49,6 +54,7 @@ columns:
       tier (Bronze, Silver, Gold, Platinum).
 
   - name: "cohort_year"
+    visualization_name: "Cohort Year"
     description: |
       FILTER + DISPLAY column. The calendar year the customer was first
       acquired. Use in WHERE when user asks about customers acquired in a
@@ -58,6 +64,7 @@ columns:
       by year — use tbl_order.fiscal_year for that.
 
   - name: "total_lifetime_spend"
+    visualization_name: "Lifetime Value (INR)"
     description: |
       DISPLAY + COMPUTATION column. Pre-aggregated total spend in INR across
       all non-cancelled orders for this customer. Use in SELECT and ORDER BY
@@ -66,6 +73,7 @@ columns:
       SUM(tbl_order.total_amount) with WHERE order_status != 5 instead.
 
   - name: "status"
+    visualization_name: "Customer Status"
     description: |
       FILTER column. 1 = Active customer, 0 = Churned/inactive. Always add
       WHERE tbl_customer.status = 1 unless the user explicitly asks for churned

@@ -16,12 +16,14 @@ primary_key: "product_id"
 
 columns:
   - name: "product_id"
+    visualization_name: "Product ID"
     description: |
       Primary key integer. JOIN key used in:
         tbl_order_item.product_id = tbl_product.product_id (to reach sales data)
       Always include when joining tbl_product to tbl_order_item.
 
   - name: "product_name"
+    visualization_name: "Product Name"
     description: |
       DISPLAY + FILTER column. Full product name used in SELECT to show product
       labels in results. Use in WHERE after entity resolution
@@ -29,6 +31,7 @@ columns:
       GROUP BY for per-product aggregations.
 
   - name: "product_sku"
+    visualization_name: "Product SKU"
     description: |
       DISPLAY + FILTER column. Alphanumeric stock-keeping unit code
       (e.g. 'ELEC-001', 'GCOL-003'). Include in SELECT when user asks for
@@ -36,12 +39,14 @@ columns:
       a product name.
 
   - name: "category_id"
+    visualization_name: "Category ID"
     description: |
       Foreign key to tbl_product_category. JOIN key:
         tbl_product.category_id = tbl_product_category.category_id
       Include when the query needs to filter or group products by category.
 
   - name: "unit_price"
+    visualization_name: "Unit Price (INR)"
     description: |
       DISPLAY column. Catalogue list price of the product in INR. Include in
       SELECT when user asks about pricing. Note: the actual sale price for a
@@ -50,12 +55,14 @@ columns:
       calculations — use tbl_order_item.line_total instead.
 
   - name: "stock_qty"
+    visualization_name: "Stock Quantity"
     description: |
       DISPLAY + FILTER column. Current warehouse stock count. Include in SELECT
       when user asks about availability or stock levels. Use in WHERE for
       filtering out-of-stock items (stock_qty = 0) or low-stock items.
 
   - name: "launch_year"
+    visualization_name: "Launch Year"
     description: |
       DISPLAY + FILTER column. Year the product was first introduced. Include
       in SELECT when user asks about when products launched. Use in WHERE to
@@ -63,6 +70,7 @@ columns:
       WHERE launch_year = 2023).
 
   - name: "status"
+    visualization_name: "Product Status"
     description: |
       FILTER column. 1 = Active/available for sale, 0 = Discontinued. Always
       add WHERE tbl_product.status = 1 when listing available products. When

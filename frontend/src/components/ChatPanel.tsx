@@ -1,19 +1,17 @@
 import { useState, useRef, useEffect } from 'react';
 import { Send, Activity, ShieldAlert } from 'lucide-react';
-import { useChatAPI } from '../hooks/useChatAPI';
 import { MessageBubble } from './MessageBubble';
 import { StatusIndicator } from './StatusIndicator';
 
+import type { Message } from '../hooks/useChatAPI';
+
 interface ChatPanelProps {
-    projectId: string;
+    messages: Message[];
+    isLoading: boolean;
+    sendMessage: (content: string) => void;
 }
 
-export function ChatPanel({ projectId }: ChatPanelProps) {
-    const {
-        messages,
-        isLoading,
-        sendMessage
-    } = useChatAPI(projectId);
+export function ChatPanel({ messages, isLoading, sendMessage }: ChatPanelProps) {
 
     const [inputValue, setInputValue] = useState('');
     const [isRateLimited, setIsRateLimited] = useState(false);
@@ -39,9 +37,11 @@ export function ChatPanel({ projectId }: ChatPanelProps) {
         scrollToBottom();
     }, [messages, isLoading]);
 
+    const isAwaitingClarification = messages.length > 0 && messages[messages.length - 1].status === 'awaiting_clarification';
+
     const handleSend = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!inputValue.trim() || isLoading || isRateLimited) return;
+        if (!inputValue.trim() || isLoading || isRateLimited || isAwaitingClarification) return;
 
         // Check rate limit on submit
         const currentCount = parseInt(localStorage.getItem('demo_query_count') || '0');
@@ -88,14 +88,14 @@ export function ChatPanel({ projectId }: ChatPanelProps) {
                             handleSend(e as any);
                         }
                     }}
-                    disabled={isLoading || isRateLimited}
-                    placeholder={isLoading ? 'Preparing your answer…' : isRateLimited ? 'Demo limit reached-contact us for full access.' : 'Ask Dfuse Data in plain language…'}
-                    className={`w-full bg-transparent text-[#111] placeholder:text-[#888] pl-5 pr-14 py-5 focus:outline-none resize-none min-h-[60px] max-h-[200px] text-base font-medium ${isRateLimited ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    disabled={isLoading || isRateLimited || isAwaitingClarification}
+                    placeholder={isLoading ? 'Preparing your answer…' : isRateLimited ? 'Demo limit reached-contact us for full access.' : isAwaitingClarification ? 'Please select an option above to continue.' : 'Ask Dfuse Data in plain language…'}
+                    className={`w-full bg-transparent text-[#111] placeholder:text-[#888] pl-5 pr-14 py-5 focus:outline-none resize-none min-h-[60px] max-h-[200px] text-base font-medium ${(isRateLimited || isAwaitingClarification) ? 'opacity-50 cursor-not-allowed' : ''}`}
                     rows={1}
                 />
                 <button
                     type="submit"
-                    disabled={!inputValue.trim() || isLoading || isRateLimited}
+                    disabled={!inputValue.trim() || isLoading || isRateLimited || isAwaitingClarification}
                     className="absolute right-3 bottom-3 p-2 bg-[#111] hover:bg-[#333] disabled:bg-[#ddd] disabled:text-[#999] text-[#f4f4f2] rounded-xl transition-all"
                 >
                     <Send size={18} className={inputValue.trim() && !isLoading && !isRateLimited ? 'translate-x-0.5 -translate-y-0.5 transition-transform' : ''} />
@@ -131,8 +131,13 @@ export function ChatPanel({ projectId }: ChatPanelProps) {
                             </div>
                         </div>
                     ) : (
-                        messages.map(msg => (
-                            <MessageBubble key={msg.id} message={msg} />
+                        messages.map((msg, idx) => (
+                            <MessageBubble 
+                                key={msg.id} 
+                                message={msg} 
+                                isLast={idx === messages.length - 1}
+                                onSend={sendMessage}
+                            />
                         ))
                     )}
 

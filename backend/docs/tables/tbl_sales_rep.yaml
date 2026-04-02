@@ -16,6 +16,7 @@ primary_key: "rep_id"
 
 columns:
   - name: "rep_id"
+    visualization_name: "Sales Rep ID"
     description: |
       Primary key integer. JOIN key used in:
         tbl_order.rep_id = tbl_sales_rep.rep_id (to link orders to reps)
@@ -24,6 +25,7 @@ columns:
       the manager self-join.
 
   - name: "rep_name"
+    visualization_name: "Sales Rep Name"
     description: |
       DISPLAY + FILTER column. Full name of the sales rep. Use in SELECT to
       show rep names in results. Use in WHERE after entity resolution
@@ -31,17 +33,20 @@ columns:
       for per-rep aggregations.
 
   - name: "rep_email"
+    visualization_name: "Email"
     description: |
       DISPLAY column. Email address of the rep. Include in SELECT only if the
       user explicitly asks for contact details or email.
 
   - name: "region_id"
+    visualization_name: "Region ID"
     description: |
       Foreign key to tbl_region. JOIN key: tbl_sales_rep.region_id =
       tbl_region.region_id. Include when the query needs to filter reps by
       region or show which region a rep covers.
 
   - name: "manager_id"
+    visualization_name: "Manager ID"
     description: |
       Self-referential FK. Points to the rep_id of this rep's direct manager
       within the same table. NULL means this rep is a top-level manager with
@@ -51,12 +56,14 @@ columns:
       Include in SELECT when showing the reporting hierarchy.
 
   - name: "hire_date"
+    visualization_name: "Hire Date"
     description: |
       DISPLAY + FILTER column. Date the rep was hired (YYYY-MM-DD). Include in
       SELECT when tenure or hire date is relevant. Use in WHERE for filtering
       by hire date range (e.g. 'reps hired after 2021').
 
   - name: "status"
+    visualization_name: "Rep Status"
     description: |
       FILTER column. 1 = Active rep, 0 = Inactive/resigned. Always add
       WHERE tbl_sales_rep.status = 1 unless inactive reps are explicitly

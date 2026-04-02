@@ -5,7 +5,8 @@ table_description: |
   <FILL IN>
 
 columns:
-  - name: ""                   # exact column name
+  - name: "" # exact column name
+    visualization_name: "" # human-readable name for UI
     description: |
       <FILL IN>
   # Repeat for every column you want documented.

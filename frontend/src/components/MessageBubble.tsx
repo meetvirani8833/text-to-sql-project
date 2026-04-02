@@ -1,16 +1,21 @@
+import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { Code2, Database } from 'lucide-react';
+import { Code2, Database, BarChart3 } from 'lucide-react';
 import type { Message } from '../hooks/useChatAPI';
+import { DynamicChart } from './DynamicChart';
 
 interface MessageBubbleProps {
     message: Message;
+    isLast?: boolean;
+    onSend?: (content: string) => void;
 }
 
-export function MessageBubble({ message }: MessageBubbleProps) {
+export function MessageBubble({ message, isLast, onSend }: MessageBubbleProps) {
     const isUser = message.role === 'user';
+    const [showChart, setShowChart] = useState(false);
 
     return (
         <div className={`flex w-full mt-8 animate-fade-in`}>
@@ -66,12 +71,46 @@ export function MessageBubble({ message }: MessageBubbleProps) {
                     )}
                 </div>
 
+                {message.status === 'awaiting_clarification' && message.clarificationOptions && (
+                    <div className="mt-4 flex flex-col gap-2.5 w-full max-w-md animate-fade-in">
+                        {message.clarificationOptions.map((opt, idx) => (
+                            <button
+                                key={idx}
+                                disabled={!isLast}
+                                onClick={() => onSend && onSend(String(idx + 1))}
+                                className={`w-full text-left px-5 py-3 rounded-xl font-medium transition-all flex items-center justify-between border ${!isLast ? 'bg-transparent border-[#e0e0e0] text-[#999] cursor-not-allowed' : 'bg-[#fff] border-[#111] text-[#111] shadow-sm hover:bg-[#111] hover:text-[#fff] group'}`}
+                            >
+                                <span>{opt}</span>
+                                {isLast && <span className="opacity-0 group-hover:opacity-100 transition-opacity text-xs uppercase tracking-widest font-bold">Select &rarr;</span>}
+                            </button>
+                        ))}
+                    </div>
+                )}
+
                 {message.spreadsheetHtml && (
                     <div className="mt-6 w-full animate-slide-up bg-[#fff] rounded-none border border-[#ccc] overflow-hidden p-6 custom-html-table">
                         <div 
                             dangerouslySetInnerHTML={{ __html: message.spreadsheetHtml }} 
                             className="overflow-x-auto text-sm"
                         />
+                    </div>
+                )}
+                
+                {message.visualizationConfig && message.queryResult && (
+                    <div className="mt-3 w-full animate-fade-in flex flex-col items-start">
+                        <button
+                            onClick={() => setShowChart(!showChart)}
+                            className="flex items-center space-x-2 bg-[#f4f4f2] text-[#333] border border-[#ddd] hover:border-[#111] hover:bg-[#e8e8e6] transition-colors py-1.5 px-3 rounded-md text-xs font-semibold uppercase tracking-wider"
+                        >
+                            <BarChart3 size={14} />
+                            <span>{showChart ? 'Hide Visualization' : 'Visualize Data'}</span>
+                        </button>
+                        
+                        {showChart && (
+                            <div className="w-full">
+                                <DynamicChart config={message.visualizationConfig} data={message.queryResult} />
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

@@ -52,60 +52,10 @@ async def detect_entities(state: EntityResolutionState) -> Dict[str, Any]:
     
     column_context_text = "\n".join(column_context_lines) if column_context_lines else "No column context available."
     
-    # Step 1: Extract candidate phrases using a simple, unconstrained LLM prompt
-    try:
-        from app.entity_resolution.prompts import EXTRACT_CANDIDATE_PHRASES_PROMPT
-        extract_llm = get_llm_gpt_5_nano()
-        extract_chain = EXTRACT_CANDIDATE_PHRASES_PROMPT | extract_llm
-        extract_res = await extract_chain.ainvoke({"question": state["rewritten_question"]})
-        
-        content = extract_res.content.strip()
-        if content.startswith("```json"): content = content[7:]
-        elif content.startswith("```"): content = content[3:]
-        if content.endswith("```"): content = content[:-3]
-        
-        candidate_phrases = json.loads(content.strip())
-        if not isinstance(candidate_phrases, list):
-            candidate_phrases = []
-    except Exception as e:
-        print(f"  Warning: Failed to extract candidate phrases: {e}")
-        candidate_phrases = []
+    # Use pre-fetched kb hints text from state (which was fired in parallel earlier)
+    kb_hints_text = state.get("kb_hints_text", "No KB hints available.")
 
-    # Step 2: Vector search each extracted phrase and deduplicate
-    kb_hints_text = "No relevant KB entries found."
-    try:
-        from app.knowledge_base.entity_vector_store import search_entity_candidates
-        import asyncio
-        
-        all_hints = {}
-        all_types = list(config_map.keys())
-        for phrase in candidate_phrases:
-            # Search each phrase against EVERY type individually to guarantee diversity (k=2)
-            for e_type in all_types:
-                results = await asyncio.to_thread(search_entity_candidates, phrase, e_type, 2)
-                for r in results:
-                    c_name = r.get("canonical_name")
-                    score = r.get("score", 0.0) # PGVector returns distance (lower = better)
-                    
-                    # Keep the lowest distance match for each canonical name
-                    if c_name not in all_hints or score < all_hints[c_name]["score"]:
-                        all_hints[c_name] = r
-                    
-        if all_hints:
-            # Sort all unique matches by distance ascending (lower distance = better) and take top 15 overall
-            sorted_hints = sorted(all_hints.values(), key=lambda x: x.get("score", float("inf")))[:15]
-            hints_lines = []
-            for r in sorted_hints:
-                # Convert distance to a pseudo-similarity (1 - distance) for the prompt
-                similarity = max(0.0, 1.0 - r.get("score", 0.0))
-                hints_lines.append(f'- "{r.get("canonical_name")}" ({r.get("entity_type")}, similarity: {similarity:.2f})')
-            kb_hints_text = "\n".join(hints_lines)
-            
-        print(f"  Fetched KB hints for {len(candidate_phrases)} candidate phrases across {len(all_types)} types.")
-    except Exception as e:
-        print(f"  Warning: Failed to fetch KB hints: {e}")
-        kb_hints_text = "No KB hints available."
-        
+    # Step 2: Detect entities using the extracted candidate phrases and KB hints
     prompt_input = {
         "rewritten_question": state["rewritten_question"],
         "entity_types_text": "\n".join(types_text),
