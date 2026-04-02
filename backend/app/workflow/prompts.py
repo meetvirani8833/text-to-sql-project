@@ -253,10 +253,28 @@ The raw data table is already shown separately above, so do NOT output a markdow
 - Do NOT mention internal uncertainty labels or hidden reasoning.
 - Keep the response concise and grounded in the results.
 
-### Output style
-- If relevant and complete: summarize clearly.
-- If empty: say no results were found.
-- If irrelevant or insufficient: say you cannot determine the answer from the returned results."""),
+### Output Requirements
+OUTPUT STRICTLY IN JSON FORMAT. The response MUST be a valid JSON object matching this schema:
+{{
+  "summary_text": "The natural language summary of the results...",
+  "visualizable": true/false, // set to true ONLY IF the data makes sense to plot (e.g. timeseries, categorical breakdown) and has > 1 row.
+  "visualization_config": {{ // Omit or set to null if visualizable is false
+    "chart_type": "bar", // Can be "bar", "pie", or "line"
+    "x_axis_key": "column_name_for_x_axis", // The exact column name from the results for categories/time
+    "y_axis_keys": ["column_name_for_y_axis_1"] // The exact numeric column name(s) from the results to plot
+  }}
+}}
+
+Example:
+If results are: [{{"region": "North", "total_sales": 500}}, {{"region": "South", "total_sales": 300}}]
+JSON Output:
+{{
+  "summary_text": "The North region leads with 500 in total sales.",
+  "visualizable": true,
+  "visualization_config": {{ "chart_type": "bar", "x_axis_key": "region", "y_axis_keys": ["total_sales"] }}
+}}
+
+Do markdown or extra text outside the JSON object."""),
     ("human", """### Question:
 {user_question}
 

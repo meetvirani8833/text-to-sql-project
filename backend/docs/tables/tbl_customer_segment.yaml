@@ -16,12 +16,14 @@ primary_key: "segment_id"
 
 columns:
   - name: "segment_id"
+    visualization_name: "Segment ID"
     description: |
       Primary key integer. JOIN key: tbl_customer.segment_id =
       tbl_customer_segment.segment_id. Always include when joining this table
       to tbl_customer.
 
   - name: "segment_name"
+    visualization_name: "Segment Name"
     description: |
       DISPLAY + FILTER + GROUP BY column. The loyalty tier label. Values:
       'Bronze', 'Silver', 'Gold', 'Platinum' (ordered low to high by spend).
@@ -31,24 +33,28 @@ columns:
       same as the 'Gold Collection' product category in tbl_product_category.
 
   - name: "segment_code"
+    visualization_name: "Segment Code"
     description: |
       Short code: 'BRZ' (Bronze), 'SLV' (Silver), 'GLD' (Gold), 'PLT'
       (Platinum). Include in SELECT when the user wants codes. Can substitute
       for segment_name in WHERE if user provides a code.
 
   - name: "min_annual_spend"
+    visualization_name: "Minimum Annual Spend (INR)"
     description: |
       DISPLAY column. Minimum annual spend in INR to qualify for this tier.
       Include in SELECT when user asks about tier thresholds or qualification
       criteria. Do not use in WHERE for filtering orders or customers.
 
   - name: "max_annual_spend"
+    visualization_name: "Maximum Annual Spend (INR)"
     description: |
       DISPLAY column. Maximum annual spend in INR for this tier. NULL for
       Platinum (no upper bound). Include in SELECT when user asks about tier
       ranges. Do not use in WHERE.
 
   - name: "status"
+    visualization_name: "Segment Status"
     description: |
       FILTER column. 1 = Active segment, 0 = Inactive. All four segments are
       currently active. Always add WHERE status = 1 unless inactive segments

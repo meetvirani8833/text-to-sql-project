@@ -16,12 +16,14 @@ primary_key: "order_id"
 
 columns:
   - name: "order_id"
+    visualization_name: "Order ID"
     description: |
       Primary key integer. JOIN key used in:
         tbl_order_item.order_id = tbl_order.order_id (to reach line items)
       Always include when joining tbl_order to tbl_order_item.
 
   - name: "customer_id"
+    visualization_name: "Customer ID"
     description: |
       Foreign key to tbl_customer. JOIN key:
         tbl_order.customer_id = tbl_customer.customer_id
@@ -29,18 +31,21 @@ columns:
       or segment data from orders.
 
   - name: "rep_id"
+    visualization_name: "Sales Rep ID"
     description: |
       Foreign key to tbl_sales_rep. JOIN key:
         tbl_order.rep_id = tbl_sales_rep.rep_id
       Always include when grouping or filtering orders by sales representative.
 
   - name: "order_date"
+    visualization_name: "Order Date"
     description: |
       DISPLAY column. The exact date the order was placed (YYYY-MM-DD). Include
       in SELECT when showing individual order records. Do NOT use YEAR(order_date)
       for year-based filtering — use fiscal_year instead.
 
   - name: "fiscal_year"
+    visualization_name: "Fiscal Year"
     description: |
       FILTER + DISPLAY + GROUP BY column. Pre-computed calendar year of the
       order (e.g. 2022, 2023, 2024). Use in WHERE for year-based filtering
@@ -49,6 +54,7 @@ columns:
       trend analysis. Always prefer this over YEAR(order_date).
 
   - name: "dispatch_date"
+    visualization_name: "Dispatch Date"
     description: |
       DISPLAY column. Date the order was dispatched (YYYY-MM-DD). NULL if the
       order has not shipped (status 1 or 2) or was cancelled (status 5).
@@ -57,6 +63,7 @@ columns:
       = 5 for that.
 
   - name: "order_status"
+    visualization_name: "Order Status"
     description: |
       FILTER column. Integer code for order state:
         1 = Pending, 2 = Confirmed, 3 = Shipped, 4 = Delivered, 5 = Cancelled.
@@ -66,6 +73,7 @@ columns:
       'Completed' → = 4. 'Cancelled' → = 5.
 
   - name: "total_amount"
+    visualization_name: "Total Amount (INR)"
     description: |
       COMPUTATION column. Pre-computed order total in INR (sum of all line items
       for this order). Use SUM(total_amount) for order-level revenue aggregations.

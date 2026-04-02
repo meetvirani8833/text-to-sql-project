@@ -82,6 +82,67 @@ async def rewrite_question(state: GraphState) -> Dict[str, Any]:
     rewritten = await chain.ainvoke({"user_question": question})
     return {"rewritten_question": rewritten}
 
+async def extract_candidate_entities(state: GraphState) -> Dict[str, Any]:
+    print("--- Extract Candidate Entities (Parallel) ---")
+    from app.knowledge_base.entity_config import load_entity_config
+    config_map = load_entity_config()
+    
+    # Step 1.1: Extract candidate phrases using a simple, unconstrained LLM prompt
+    try:
+        from app.entity_resolution.prompts import EXTRACT_CANDIDATE_PHRASES_PROMPT
+        extract_llm = get_llm_gpt_5_nano()
+        extract_chain = EXTRACT_CANDIDATE_PHRASES_PROMPT | extract_llm
+        extract_res = await extract_chain.ainvoke({"question": state["rewritten_question"]})
+        
+        content = extract_res.content.strip()
+        if content.startswith("```json"): content = content[7:]
+        elif content.startswith("```"): content = content[3:]
+        if content.endswith("```"): content = content[:-3]
+        
+        candidate_phrases = json.loads(content.strip())
+        if not isinstance(candidate_phrases, list):
+            candidate_phrases = []
+    except Exception as e:
+        print(f"  Warning: Failed to extract candidate phrases: {e}")
+        candidate_phrases = []
+
+    # Step 1.2: Vector search each extracted phrase and deduplicate
+    kb_hints_text = "No relevant KB entries found."
+    try:
+        from app.knowledge_base.entity_vector_store import search_entity_candidates
+        import asyncio
+        
+        all_hints = {}
+        all_types = list(config_map.keys())
+        for phrase in candidate_phrases:
+            # Search each phrase against EVERY type individually to guarantee diversity (k=2)
+            for e_type in all_types:
+                results = await asyncio.to_thread(search_entity_candidates, phrase, e_type, 2)
+                for r in results:
+                    c_name = r.get("canonical_name")
+                    score = r.get("score", 0.0) # PGVector returns distance (lower = better)
+                    
+                    # Keep the lowest distance match for each canonical name
+                    if c_name not in all_hints or score < all_hints[c_name]["score"]:
+                        all_hints[c_name] = r
+                    
+        if all_hints:
+            # Sort all unique matches by distance ascending (lower distance = better) and take top 15 overall
+            sorted_hints = sorted(all_hints.values(), key=lambda x: x.get("score", float("inf")))[:15]
+            hints_lines = []
+            for r in sorted_hints:
+                # Convert distance to a pseudo-similarity (1 - distance) for the prompt
+                similarity = max(0.0, 1.0 - r.get("score", 0.0))
+                hints_lines.append(f'- "{r.get("canonical_name")}" ({r.get("entity_type")}, similarity: {similarity:.2f})')
+            kb_hints_text = "\n".join(hints_lines)
+            
+        print(f"  Fetched KB hints for {len(candidate_phrases)} candidate phrases across {len(all_types)} types.")
+    except Exception as e:
+        print(f"  Warning: Failed to fetch KB hints: {e}")
+        kb_hints_text = "No KB hints available."
+        
+    return {"kb_hints_text": kb_hints_text}
+
 def retrieve_tables(state: GraphState) -> Dict[str, Any]:
     print("--- Retrieve Tables ---")
     question = state.get("rewritten_question", state["user_question"])
@@ -199,6 +260,7 @@ async def retrieve_metadata(state: GraphState) -> Dict[str, Any]:
                  "column_name": col.column_name,
                  "data_type": col.data_type,
                  "user_description": col.user_description,
+                 "visualization_name": col.visualization_name,
                  "is_pk": col.is_primary_key,
                  "is_fk": col.is_foreign_key
              })
@@ -477,11 +539,30 @@ def execute_query(state: GraphState) -> Dict[str, Any]:
         return {"query_result": None, "error_details": "MySQL connection not configured", "retry_count": state.get("retry_count", 0) + 1}
 
     try:
+        # Build mapping from raw column -> visualization name
+        viz_map = {}
+        for m in state.get("table_metadata", []):
+            if m.get("visualization_name"):
+                viz_map[m["column_name"].lower()] = m["visualization_name"]
+
         with engine.connect() as conn:
             result = conn.execute(text(sql))
-            keys = result.keys()
+            raw_keys = result.keys()
+            
+            # Map raw keys to visualization names where available
+            display_keys = []
+            for k in raw_keys:
+                k_lower = k.lower()
+                if k_lower in viz_map:
+                    display_keys.append(viz_map[k_lower])
+                else:
+                    # Fallback for LLM-generated aliases (e.g. TOTAL_REVENUE -> Total Revenue)
+                    beautified = k.replace('_', ' ').title().strip()
+                    beautified = " ".join([word if word.lower() != 'id' else 'ID' for word in beautified.split()])
+                    display_keys.append(beautified)
+            
             rows = [
-                {k: _sanitize_value(v) for k, v in zip(keys, row)}
+                {dk: _sanitize_value(v) for dk, v in zip(display_keys, row)}
                 for row in result.fetchall()
             ]
         return {"query_result": rows, "error_details": None}
@@ -495,15 +576,29 @@ async def summarize_result(state: GraphState) -> Dict[str, Any]:
     res = state.get("query_result", [])
     preview = str(res[:50]) if res else "No results"
     
-    chain = SUMMARIZE_RESULT_PROMPT | llm | StrOutputParser()
-    summary = await chain.ainvoke({
+    chain = SUMMARIZE_RESULT_PROMPT | llm
+    res_obj = await chain.ainvoke({
         "user_question": state["user_question"],
         "generated_sql": state["generated_sql"],
         "row_count": len(res) if res else 0,
         "result_preview": preview
     })
     
-    return {"result_summary": summary}
+    content = res_obj.content.strip()
+    if content.startswith("```json"): content = content[7:]
+    elif content.startswith("```"): content = content[3:]
+    if content.endswith("```"): content = content[:-3]
+    
+    try:
+        parsed = json.loads(content.strip())
+        summary = parsed.get("summary_text", "Done.")
+        viz_config = parsed.get("visualization_config", None) if parsed.get("visualizable") else None
+    except Exception as e:
+        print(f"Failed to parse LLM JSON: {e}")
+        summary = content
+        viz_config = None
+    
+    return {"result_summary": summary, "visualization_config": viz_config}
 
 def fallback(state: GraphState) -> Dict[str, Any]:
     print("--- Fallback ---")

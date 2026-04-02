@@ -2,12 +2,14 @@ import { useState } from 'react';
 import { ChatPanel } from './components/ChatPanel';
 import { LandingPage } from './components/LandingPage';
 import { ArrowLeft } from 'lucide-react';
+import { useChatAPI } from './hooks/useChatAPI';
 
 function App() {
   const [currentView, setCurrentView] = useState<'landing' | 'chat'>('landing');
 
   // Using a default project ID for the MVP
   const PROJECT_ID = "default";
+  const chatState = useChatAPI(PROJECT_ID);
 
   if (currentView === 'landing') {
     return <LandingPage onStartDemo={() => setCurrentView('chat')} />;
@@ -34,7 +36,11 @@ function App() {
 
       {/* Main Chat Area Container */}
       <main className="flex-1 flex flex-col h-[calc(100vh-64px)] overflow-hidden">
-        <ChatPanel projectId={PROJECT_ID} />
+        <ChatPanel 
+          messages={chatState.messages}
+          isLoading={chatState.isLoading}
+          sendMessage={chatState.sendMessage}
+        />
       </main>
 
     </div>

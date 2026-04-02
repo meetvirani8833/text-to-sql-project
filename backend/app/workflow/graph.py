@@ -4,7 +4,7 @@ from app.workflow.state import GraphState
 from app.workflow.nodes import (
     rewrite_question, retrieve_tables, retrieve_high_level_metadata,
     filter_tables, retrieve_metadata, retrieve_join_paths, retrieve_missing_tables,
-    prune_columns, generate_query,
+    prune_columns, generate_query, extract_candidate_entities,
     validate_query, execute_query, summarize_result, fallback
 )
 from app.entity_resolution.graph import build_entity_resolution_subgraph
@@ -26,6 +26,7 @@ def build_graph():
     graph.add_node("retrieve_missing_tables", retrieve_missing_tables)
     graph.add_node("retrieve_metadata_for_missing", retrieve_metadata)  # reuses same fn, different edge target
     graph.add_node("prune_columns", prune_columns)
+    graph.add_node("extract_candidate_entities", extract_candidate_entities)
 
     # Entity Resolution Subgraph - runs after column pruning
     entity_subgraph = build_entity_resolution_subgraph().compile()
@@ -41,7 +42,9 @@ def build_graph():
     # Start
     graph.set_entry_point("rewrite_question")
 
+    # Parallel routes after rewriting question
     graph.add_edge("rewrite_question", "retrieve_tables")
+    graph.add_edge("rewrite_question", "extract_candidate_entities")
     graph.add_edge("retrieve_tables", "retrieve_high_level_metadata")
     graph.add_edge("retrieve_high_level_metadata", "filter_tables")
     graph.add_edge("filter_tables", "retrieve_metadata")
@@ -60,8 +63,8 @@ def build_graph():
     graph.add_edge("retrieve_missing_tables", "retrieve_metadata_for_missing")
     graph.add_edge("retrieve_metadata_for_missing", "prune_columns")
     
-    # After pruning columns, run entity resolution WITH column context
-    graph.add_edge("prune_columns", "entity_resolution")
+    # After pruning columns AND extracting candidate entities, run entity resolution
+    graph.add_edge(["prune_columns", "extract_candidate_entities"], "entity_resolution")
     graph.add_edge("entity_resolution", "generate_query")
 
     graph.add_edge("generate_query", "validate_query")

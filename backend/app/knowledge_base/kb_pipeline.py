@@ -16,6 +16,7 @@ from app.knowledge_base.neo4j_graph import upsert_table_node, upsert_fk_edge
 class ColumnDoc(BaseModel):
     name: str
     description: str
+    visualization_name: Optional[str] = None
 
 class TableDoc(BaseModel):
     table_name: str
@@ -81,6 +82,7 @@ async def process_table(table_name: str, project_name: str = "Curriculum DB"):
     user_table_desc = yaml_data.get("table_description", "")
     columns_list = yaml_data.get("columns", [])
     user_col_descs = {c['name']: c['description'] for c in columns_list}
+    user_col_viz_names = {c['name']: c.get('visualization_name') for c in columns_list}
     
     # 2. Introspect MySQL
     inspector = get_mysql_inspector()
@@ -217,6 +219,7 @@ async def process_table(table_name: str, project_name: str = "Curriculum DB"):
                 c.fk_target_column = fk_target.get("target_column")
                 c.user_description = user_col_descs.get(c_name)
                 c.generated_explanation = col_expl_map.get(c_name)
+                c.visualization_name = user_col_viz_names.get(c_name)
             else:
                 new_col = ColumnMeta(
                     table_meta_id=table_meta.id,
@@ -228,7 +231,8 @@ async def process_table(table_name: str, project_name: str = "Curriculum DB"):
                     fk_target_table=fk_target.get("target_table"),
                     fk_target_column=fk_target.get("target_column"),
                     user_description=user_col_descs.get(c_name),
-                    generated_explanation=col_expl_map.get(c_name)
+                    generated_explanation=col_expl_map.get(c_name),
+                    visualization_name=user_col_viz_names.get(c_name)
                 )
                 session.add(new_col)
         

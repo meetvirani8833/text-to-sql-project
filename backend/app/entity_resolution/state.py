@@ -10,6 +10,7 @@ class EntityResolutionState(TypedDict):
     pruned_columns: Dict[str, List[str]]         # table -> [column_names]
     
     # Entity Detection
+    kb_hints_text: str                           # entity candidate hints from vector search
     detected_entities: List[Dict[str, Any]]
     # Each: {"text": "computer science", "candidate_types": ["department","course","programme"]}
     

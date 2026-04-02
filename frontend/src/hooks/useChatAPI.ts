@@ -7,6 +7,9 @@ export interface Message {
     status?: 'completed' | 'awaiting_clarification' | 'error';
     spreadsheetHtml?: string | null;
     sql?: string | null;
+    queryResult?: any[] | null;
+    visualizationConfig?: any | null;
+    clarificationOptions?: string[] | null;
     timestamp: Date;
 }
 
@@ -62,6 +65,9 @@ export function useChatAPI(projectId: string) {
                 status: data.status,
                 spreadsheetHtml: data.spreadsheet_structure,
                 sql: data.generated_sql,
+                queryResult: data.query_result,
+                visualizationConfig: data.visualization_config,
+                clarificationOptions: data.clarification_options,
                 timestamp: new Date()
             };
             

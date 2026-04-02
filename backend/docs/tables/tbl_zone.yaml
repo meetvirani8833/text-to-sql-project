@@ -14,12 +14,14 @@ primary_key: "zone_id"
 
 columns:
   - name: "zone_id"
+    visualization_name: "Zone ID"
     description: |
       Primary key integer. Use in JOIN ON tbl_zone.zone_id = tbl_region.zone_id
       to connect zones to their regions. Include in SELECT only if the user
       needs the raw ID; otherwise prefer zone_name.
 
   - name: "zone_name"
+    visualization_name: "Zone Name"
     description: |
       DISPLAY + GROUP BY column. The human-readable zone label used in SELECT
       and GROUP BY for geographic aggregations. Values: 'North Zone',
@@ -27,12 +29,14 @@ columns:
       explicitly names a zone (after entity resolution resolves it here).
 
   - name: "zone_code"
+    visualization_name: "Zone Code"
     description: |
       Short code for the zone ('NZ', 'SZ', 'EZ', 'WZ'). Include in SELECT
       when the user asks for codes or abbreviations. Can be used in WHERE as
       an alternative to zone_name if the user supplies a code.
 
   - name: "status"
+    visualization_name: "Zone Status"
     description: |
       FILTER column. 1 = Active zone, 0 = Inactive zone. Always add
       WHERE tbl_zone.status = 1 unless the user explicitly asks for
