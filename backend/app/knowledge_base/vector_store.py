@@ -15,13 +15,19 @@ def get_pgvector_connection_string():
         return f"{base}?sslmode={settings.POSTGRES_SSLMODE}"
     return base
 
+# Singleton: reuse the same PGVector store to avoid repeated SSL connections to Neon
+_table_vector_store = None
+
 def get_vector_store():
-    return PGVector(
-        embeddings=get_embeddings(),
-        collection_name="curriculum_tables",
-        connection=get_pgvector_connection_string(),
-        use_jsonb=True,
-    )
+    global _table_vector_store
+    if _table_vector_store is None:
+        _table_vector_store = PGVector(
+            embeddings=get_embeddings(),
+            collection_name="curriculum_tables",
+            connection=get_pgvector_connection_string(),
+            use_jsonb=True,
+        )
+    return _table_vector_store
 
 def upsert_table_embedding(table_name: str, explanation_text: str):
     """

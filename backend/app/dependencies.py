@@ -32,12 +32,17 @@ from sqlalchemy import create_engine, inspect
 
 # ... Postgres logic (unchanged) ...
 
-# Neo4j Driver
+# Neo4j Driver (singleton — reuse across the process to avoid repeated TLS handshakes)
+_neo4j_driver = None
+
 def get_neo4j_driver():
-    return GraphDatabase.driver(
-        settings.NEO4J_URI,
-        auth=(settings.NEO4J_USER, settings.NEO4J_PASSWORD)
-    )
+    global _neo4j_driver
+    if _neo4j_driver is None:
+        _neo4j_driver = GraphDatabase.driver(
+            settings.NEO4J_URI,
+            auth=(settings.NEO4J_USER, settings.NEO4J_PASSWORD)
+        )
+    return _neo4j_driver
 
 # LangChain LLM & Embeddings
 def get_llm():
