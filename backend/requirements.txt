@@ -4,6 +4,7 @@ websockets
 sqlalchemy
 pymysql
 psycopg2-binary
+psycopg[binary]
 pgvector
 neo4j
 langchain

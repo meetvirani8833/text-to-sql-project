@@ -106,7 +106,7 @@ async def extract_candidate_entities(state: GraphState) -> Dict[str, Any]:
         print(f"  Warning: Failed to extract candidate phrases: {e}")
         candidate_phrases = []
 
-    # Step 1.2: Vector search each extracted phrase and deduplicate
+    # Step 1.2: Vector search each extracted phrase — ALL types in PARALLEL
     kb_hints_text = "No relevant KB entries found."
     try:
         from app.knowledge_base.entity_vector_store import search_entity_candidates
@@ -114,24 +114,28 @@ async def extract_candidate_entities(state: GraphState) -> Dict[str, Any]:
         
         all_hints = {}
         all_types = list(config_map.keys())
+        
+        # Build all search tasks upfront and fire them concurrently
+        search_tasks = []
         for phrase in candidate_phrases:
-            # Search each phrase against EVERY type individually to guarantee diversity (k=2)
             for e_type in all_types:
-                results = await asyncio.to_thread(search_entity_candidates, phrase, e_type, 2)
-                for r in results:
+                search_tasks.append(asyncio.to_thread(search_entity_candidates, phrase, e_type, 2))
+        
+        if search_tasks:
+            all_results = await asyncio.gather(*search_tasks, return_exceptions=True)
+            for result_batch in all_results:
+                if isinstance(result_batch, Exception):
+                    continue
+                for r in result_batch:
                     c_name = r.get("canonical_name")
-                    score = r.get("score", 0.0) # PGVector returns distance (lower = better)
-                    
-                    # Keep the lowest distance match for each canonical name
+                    score = r.get("score", 0.0)
                     if c_name not in all_hints or score < all_hints[c_name]["score"]:
                         all_hints[c_name] = r
                     
         if all_hints:
-            # Sort all unique matches by distance ascending (lower distance = better) and take top 15 overall
             sorted_hints = sorted(all_hints.values(), key=lambda x: x.get("score", float("inf")))[:15]
             hints_lines = []
             for r in sorted_hints:
-                # Convert distance to a pseudo-similarity (1 - distance) for the prompt
                 similarity = max(0.0, 1.0 - r.get("score", 0.0))
                 hints_lines.append(f'- "{r.get("canonical_name")}" ({r.get("entity_type")}, similarity: {similarity:.2f})')
             kb_hints_text = "\n".join(hints_lines)
@@ -143,12 +147,12 @@ async def extract_candidate_entities(state: GraphState) -> Dict[str, Any]:
         
     return {"kb_hints_text": kb_hints_text}
 
-def retrieve_tables(state: GraphState) -> Dict[str, Any]:
+async def retrieve_tables(state: GraphState) -> Dict[str, Any]:
     print("--- Retrieve Tables ---")
+    import asyncio
     question = state.get("rewritten_question", state["user_question"])
-    # Vector store search is sync (pgvector sqlalchemy usually sync unless async driver used in custom way)
-    # LangChain PGVector is sync by default.
-    candidates = search_tables(question, k=10)
+    # Run sync PGVector search in a thread so it doesn't block parallel nodes
+    candidates = await asyncio.to_thread(search_tables, question, 10)
     return {"candidate_tables": candidates}
 
 async def retrieve_high_level_metadata(state: GraphState) -> Dict[str, Any]:
@@ -277,24 +281,27 @@ async def retrieve_metadata(state: GraphState) -> Dict[str, Any]:
 #    paths = find_join_path(selected[0], selected[1])
 #    return {"join_paths": paths}
 
-def retrieve_join_paths(state: GraphState) -> Dict[str, Any]:
+async def retrieve_join_paths(state: GraphState) -> Dict[str, Any]:
     print("--- Retrieve Join Paths ---")
+    import asyncio
     selected = state["selected_tables"]
     if len(selected) < 2:
         return {"join_paths": []}
     
-    all_paths = []
-    # Find join paths between consecutive pairs: A→B, B→C, C→D, etc.
-    for i in range(len(selected) - 1):
-        table_start = selected[i]
-        table_end = selected[i + 1]
-        print(f"  Finding join path: {table_start} → {table_end}")
-        paths = find_join_path(table_start, table_end)
-        if paths:
-            all_paths.extend(paths)
-        else:
-            print(f"  Warning: No join path found between {table_start} and {table_end}")
+    # Fire all pair lookups in parallel instead of sequentially
+    async def _find_pair(start: str, end: str):
+        print(f"  Finding join path: {start} → {end}")
+        paths = await asyncio.to_thread(find_join_path, start, end)
+        if not paths:
+            print(f"  Warning: No join path found between {start} and {end}")
+        return paths or []
     
+    tasks = [
+        _find_pair(selected[i], selected[i + 1])
+        for i in range(len(selected) - 1)
+    ]
+    results = await asyncio.gather(*tasks)
+    all_paths = [step for batch in results for step in batch]
     return {"join_paths": all_paths}
 
 def retrieve_missing_tables(state: GraphState) -> Dict[str, Any]:

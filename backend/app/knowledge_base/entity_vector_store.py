@@ -4,13 +4,19 @@ from langchain_core.documents import Document
 from app.knowledge_base.vector_store import get_pgvector_connection_string
 from app.dependencies import get_embeddings
 
+# Singleton: reuse the same entity vector store across all calls
+_entity_vector_store = None
+
 def get_entity_vector_store():
-    return PGVector(
-        embeddings=get_embeddings(),
-        collection_name="entity_vectors",
-        connection=get_pgvector_connection_string(),
-        use_jsonb=True,
-    )
+    global _entity_vector_store
+    if _entity_vector_store is None:
+        _entity_vector_store = PGVector(
+            embeddings=get_embeddings(),
+            collection_name="entity_vectors",
+            connection=get_pgvector_connection_string(),
+            use_jsonb=True,
+        )
+    return _entity_vector_store
 
 def upsert_entity_embeddings(documents: List[Document]):
     store = get_entity_vector_store()
