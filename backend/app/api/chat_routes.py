@@ -112,9 +112,26 @@ async def chat_endpoint(req: ChatRequest):
             )
     else:
         # Starting fresh (or follow-up question on same thread)
+        # Build conversation context from last 3 turns (6 entries = 3 user + 3 system)
+        conversation_context = ""
+        previous_sql = ""
+        recent = req.history[-6:] if len(req.history) > 6 else req.history
+        for entry in recent:
+            if "user" in entry:
+                conversation_context += f"User: {entry['user']}\n"
+            elif "system" in entry:
+                # Truncate long summaries to keep prompt lean
+                sys_text = str(entry.get("system", ""))[:200]
+                conversation_context += f"Assistant: {sys_text}\n"
+                # Extract the most recent SQL from history
+                if entry.get("sql"):
+                    previous_sql = entry["sql"]
+
         inputs_or_command = {
             "project_id": req.project_id,
             "user_question": req.text,
+            "conversation_context": conversation_context.strip(),
+            "previous_sql": previous_sql,
             "retry_count": 0,
             "selected_tables": [],
             "candidate_tables": [],
@@ -206,7 +223,7 @@ async def chat_endpoint(req: ChatRequest):
         if not new_history:
             new_history.append({"summary": None})
         new_history.append({"user": req.text})
-        new_history.append({"system": agent_text})
+        new_history.append({"system": agent_text, "sql": sql or ""})
         
         viz_config = final_state_vals.get("visualization_config")
         

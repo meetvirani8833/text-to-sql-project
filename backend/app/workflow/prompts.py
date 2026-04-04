@@ -14,6 +14,11 @@ Rules:
 - Do NOT add or assume details that the user did not explicitly include.
 - Keep the rewritten question as short as possible.
 
+Follow-Up Resolution Rules:
+- If the current question references prior conversation context (using words like "that", "those", "same", "it", "them", "also", "now", "break it down", "filter that", "show me just"), resolve the reference using the conversation context below and produce a STANDALONE question.
+- If the current question is completely independent and self-contained, IGNORE the conversation context entirely.
+- NEVER mention "previous query" or "earlier" in the rewrite — the output must read as a fresh, standalone question.
+
 Examples:
 User: "Show me all orders"
 Rewrite: "Show information about orders"
@@ -24,22 +29,19 @@ Rewrite: "List products in the Electronics category"
 User: "Find total revenue for the Gold Collection"
 Rewrite: "Find total revenue for the Gold Collection category"
 
-User: "Which customers are in the Platinum segment?"
-Rewrite: "List customers in the Platinum segment"
+Context: User asked "top 10 products by revenue" → Current: "now show me just Electronics"
+Rewrite: "List top 10 products by revenue in the Electronics category"
 
-User: "Show all delivered orders in fiscal year 2024"
-Rewrite: "List delivered orders in fiscal year 2024"
-
-User: "Give me revenue by region for last year"
-Rewrite: "Find revenue grouped by region for fiscal year 2023"
+Context: User asked "which sales rep has highest revenue" → Current: "what region are they from?"
+Rewrite: "Find the region of the sales rep with the highest revenue"
 
 Conversation Context:
+{conversation_context}
 
-Previous question:
 Current question: {user_question}
 
 Task:
-Rewrite the current question into a single, short, clear, and structured query that preserves any filtering terms exactly as provided.
+Rewrite the current question into a single, short, clear, and structured query that preserves any filtering terms exactly as provided. If it is a follow-up, resolve all references into a standalone question.
 """)
 ])
 
@@ -174,6 +176,7 @@ GENERATE_QUERY_PROMPT = ChatPromptTemplate.from_messages([
 - Do not use columns that are not listed in the `Available Columns` section and never use `*` in the SELECT statement. If you need all columns, specify their names explicitly.
 - Aliases must be distinguishable.
 - Entity names in the rewritten question appear as `'CANONICAL NAME'(entity_type)` — these MUST appear as exact-match WHERE filters in the SQL.
+- If a previous query is provided below and the current question is a refinement (e.g. adding a filter, changing grouping, narrowing scope), use it as a starting point and modify it. If the question is entirely new, ignore the previous query.
 
 ### **Available Columns:**
 {pruned_columns_text}
@@ -186,6 +189,9 @@ GENERATE_QUERY_PROMPT = ChatPromptTemplate.from_messages([
 
 ### **Upstream Warnings / Entity Confidence:**
 {confidence_flags_text}
+
+### **Previous Query (for follow-up refinement):**
+{previous_sql_context}
 
 ### **Output Format:**
 - Output ONLY the SQL query, no explanation.

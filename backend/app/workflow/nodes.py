@@ -77,9 +77,13 @@ def format_schema_for_generation(
 async def rewrite_question(state: GraphState) -> Dict[str, Any]:
     print("--- Rewrite Question ---")
     question = state["user_question"]
+    context = state.get("conversation_context", "")
     llm = get_llm_gpt_5_nano()
     chain = REWRITE_QUESTION_PROMPT | llm | StrOutputParser()
-    rewritten = await chain.ainvoke({"user_question": question})
+    rewritten = await chain.ainvoke({
+        "user_question": question,
+        "conversation_context": context if context else "None (this is the first question)"
+    })
     return {"rewritten_question": rewritten}
 
 async def extract_candidate_entities(state: GraphState) -> Dict[str, Any]:
@@ -472,6 +476,10 @@ async def generate_query(state: GraphState) -> Dict[str, Any]:
     flags = state.get("confidence_flags", [])
     flags_text = "\n".join([f"- {f}" for f in flags]) if flags else "None"
     
+    # Build previous SQL context for follow-up refinement
+    prev_sql = state.get("previous_sql", "")
+    previous_sql_context = f"{prev_sql}" if prev_sql else "None (this is a fresh question)"
+    
     chain = GENERATE_QUERY_PROMPT | llm | StrOutputParser()
     sql = await chain.ainvoke({
         "rewritten_question": state.get("rewritten_question", ""),
@@ -479,7 +487,8 @@ async def generate_query(state: GraphState) -> Dict[str, Any]:
         "pruned_columns_text": enriched_schema,
         "join_paths_text": join_text,
         "rules_text": "\n".join([f"- {r}" for r in state.get("applicable_rules", [])]),
-        "confidence_flags_text": flags_text
+        "confidence_flags_text": flags_text,
+        "previous_sql_context": previous_sql_context
     })
     
     sql = sql.replace("```sql", "").replace("```", "").strip()
