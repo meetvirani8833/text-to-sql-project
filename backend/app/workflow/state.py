@@ -6,6 +6,10 @@ class GraphState(TypedDict):
     user_question: str
     rewritten_question: str            # after rewriting
     
+    # --- Conversational Memory ---
+    conversation_context: str                    # summary of prior Q&A turns
+    previous_sql: str                            # SQL from last successful query (for refinement)
+    
     # --- Entity Resolution ---
     kb_hints_text: str                           # entity candidate hints from vector search
     detected_entities: List[Dict[str, Any]]
