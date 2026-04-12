@@ -4,45 +4,78 @@
 
 @layer utilities {
     .custom-scrollbar::-webkit-scrollbar {
-        width: 6px;
-        height: 6px;
+        width: 5px;
+        height: 5px;
     }
 
     .custom-scrollbar::-webkit-scrollbar-track {
         background: transparent;
-        border-radius: 4px;
     }
 
     .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: rgba(0, 0, 0, 0.2);
-        border-radius: 4px;
+        background: rgba(0, 0, 0, 0.15);
+        border-radius: 999px;
     }
 
     .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: rgba(0, 0, 0, 0.4);
+        background: rgba(0, 0, 0, 0.3);
     }
 }
 
 @layer components {
     .custom-html-table table {
-        @apply w-full text-left border-collapse text-sm;
+        @apply w-full text-left border-collapse text-[13px];
     }
-    
+
     .custom-html-table th {
-        @apply bg-[#f4f4f2] text-[#111] font-semibold tracking-wider uppercase text-[11px] px-4 py-3 border-b border-[#111];
+        @apply bg-[#fafafa] text-[#888] font-bold tracking-wider uppercase text-[10px] px-3 sm:px-4 py-2.5 border-b border-[#e5e5e3] sticky top-0;
     }
-    
+
     .custom-html-table td {
-        @apply px-4 py-3 border-b border-[#eee] text-[#333] transition-colors whitespace-nowrap;
+        @apply px-3 sm:px-4 py-2.5 border-b border-[#f0f0ee] text-[#333] transition-colors;
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
-    
+
     .custom-html-table tbody tr:hover td {
-        @apply bg-[#fafafa];
+        @apply bg-[#f8f8f6];
     }
-    
+
     .custom-html-table tbody tr:last-child td {
         @apply border-0;
     }
+
+    /* Constrain table height on mobile */
+    .custom-html-table > div {
+        max-height: 320px;
+        overflow-y: auto;
+    }
+
+    @media (min-width: 640px) {
+        .custom-html-table > div {
+            max-height: 400px;
+        }
+    }
+}
+
+@keyframes fade-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-up {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+    animation: fade-in 0.35s ease-out both;
+}
+
+.animate-slide-up {
+    animation: slide-up 0.4s ease-out both;
 }
 
 body {

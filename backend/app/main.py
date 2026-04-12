@@ -7,15 +7,21 @@ from app.config import settings
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: Initialize DB tables
+    # Startup: Initialize DB tables (non-fatal — tables already exist in prod)
     from app.dependencies import init_db
     print("Initializing database...")
-    await init_db()
-    print("Database initialized.")
-    
+    try:
+        await init_db()
+        print("Database initialized.")
+    except Exception as e:
+        print(f"WARNING: Database init failed (will retry on first request): {e}")
+
     # Seed global rules from docs/rules/global_rules.yaml
-    await seed_global_rules()
-    
+    try:
+        await seed_global_rules()
+    except Exception as e:
+        print(f"WARNING: Global rules seeding failed: {e}")
+
     yield
     # Shutdown
     print("Shutting down...")

@@ -11,6 +11,7 @@ import {
     Building2,
     Mail,
 } from 'lucide-react';
+import { ProductShowcase } from './ProductShowcase';
 
 interface LandingPageProps {
     onStartDemo: () => void;
@@ -35,6 +36,9 @@ export function LandingPage({ onStartDemo }: LandingPageProps) {
                 </a>
 
                 <div className="hidden md:flex items-center space-x-10 text-sm font-medium tracking-tight">
+                    <a href="#showcase" className="hover:opacity-60 transition-opacity">
+                        Walkthrough
+                    </a>
                     <a href="#product" className="hover:opacity-60 transition-opacity">
                         Product
                     </a>
@@ -117,6 +121,13 @@ export function LandingPage({ onStartDemo }: LandingPageProps) {
                             </div>
                         </motion.div>
                     </div>
+                </section>
+
+                <div className="border-t border-[#111] mx-6 max-w-7xl xl:mx-auto" />
+
+                {/* ── Product Showcase / Walkthrough ── */}
+                <section id="showcase" className="scroll-mt-24">
+                    <ProductShowcase onStartDemo={onStartDemo} />
                 </section>
 
                 <div className="border-t border-[#111] mx-6 max-w-7xl xl:mx-auto" />
