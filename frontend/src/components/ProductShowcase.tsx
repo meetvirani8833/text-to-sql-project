@@ -141,6 +141,7 @@ export function ProductShowcase({ onStartDemo }: ProductShowcaseProps) {
     const [isPaused, setIsPaused] = useState(false);
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const videoRef = useRef<HTMLVideoElement | null>(null);
+    const sectionRef = useRef<HTMLDivElement | null>(null);
 
     const beat = currentBeat >= 0 && currentBeat < BEATS.length ? BEATS[currentBeat] : null;
 
@@ -194,6 +195,10 @@ export function ProductShowcase({ onStartDemo }: ProductShowcaseProps) {
         setCurrentBeat(0);
         setIsPlaying(true);
         setIsPaused(false);
+        // Smooth scroll the showcase to center of viewport
+        setTimeout(() => {
+            sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 50);
     };
 
     const togglePause = () => {
@@ -213,8 +218,8 @@ export function ProductShowcase({ onStartDemo }: ProductShowcaseProps) {
     /* ── Idle state: attractive play button ── */
     if (currentBeat < 0) {
         return (
-            <section className="relative w-full py-20 md:py-28">
-                <div className="max-w-5xl mx-auto px-6 flex flex-col items-center text-center">
+            <section className="relative w-full min-h-[70vh] md:h-screen flex items-center justify-center">
+                <div className="max-w-6xl mx-auto px-6 py-16 md:py-24 flex flex-col items-center text-center">
                     <motion.p
                         initial={{ opacity: 0, y: 12 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -269,11 +274,12 @@ export function ProductShowcase({ onStartDemo }: ProductShowcaseProps) {
     /* ── Active showcase ── */
     return (
         <section
+            ref={sectionRef}
             className={`relative w-full overflow-hidden transition-colors duration-700 ${
                 isDark ? 'bg-[#111] text-[#f4f4f2]' : 'bg-[#f4f4f2] text-[#111]'
             }`}
         >
-            <div className="max-w-6xl mx-auto px-6 py-16 md:py-24 flex flex-col items-center min-h-[520px] md:min-h-[600px] justify-center">
+            <div className="max-w-6xl mx-auto px-6 py-16 md:py-24 flex flex-col items-center justify-center min-h-[70vh] md:h-screen">
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={beat?.id}
