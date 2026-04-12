@@ -88,13 +88,13 @@ const textVariants = {
         opacity: 1,
         y: 0,
         filter: 'blur(0px)',
-        transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] },
+        transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] as const },
     },
     exit: {
         opacity: 0,
         y: -20,
         filter: 'blur(6px)',
-        transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] },
+        transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const },
     },
 };
 
@@ -103,7 +103,7 @@ const subtextVariants = {
     animate: {
         opacity: 1,
         y: 0,
-        transition: { duration: 0.6, delay: 0.25, ease: [0.22, 1, 0.36, 1] },
+        transition: { duration: 0.6, delay: 0.25, ease: [0.22, 1, 0.36, 1] as const },
     },
     exit: {
         opacity: 0,
@@ -118,7 +118,7 @@ const videoVariants = {
         opacity: 1,
         scale: 1,
         y: 0,
-        transition: { duration: 0.6, delay: 0.3, ease: [0.22, 1, 0.36, 1] },
+        transition: { duration: 0.6, delay: 0.3, ease: [0.22, 1, 0.36, 1] as const },
     },
     exit: {
         opacity: 0,
@@ -429,7 +429,7 @@ export function ProductShowcase({ onStartDemo }: ProductShowcaseProps) {
                     animate={{
                         width: `${((currentBeat + 1) / BEATS.length) * 100}%`,
                     }}
-                    transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                    transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] as const }}
                 />
             </div>
         </section>
