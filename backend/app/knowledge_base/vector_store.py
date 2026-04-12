@@ -15,6 +15,14 @@ def get_pgvector_connection_string():
         return f"{base}?sslmode={settings.POSTGRES_SSLMODE}"
     return base
 
+# Engine args to survive Neon free-tier auto-suspend (kills connections after ~300s idle)
+_ENGINE_ARGS = {
+    "pool_pre_ping": True,     # test connection liveness before each use
+    "pool_recycle": 270,       # recycle connections before Neon's 300s idle timeout
+    "pool_size": 2,
+    "max_overflow": 3,
+}
+
 # Singleton: reuse the same PGVector store to avoid repeated SSL connections to Neon
 _table_vector_store = None
 
@@ -26,8 +34,14 @@ def get_vector_store():
             collection_name="curriculum_tables",
             connection=get_pgvector_connection_string(),
             use_jsonb=True,
+            engine_args=_ENGINE_ARGS,
         )
     return _table_vector_store
+
+def _reset_vector_store():
+    """Invalidate singleton so next call rebuilds the connection."""
+    global _table_vector_store
+    _table_vector_store = None
 
 def upsert_table_embedding(table_name: str, explanation_text: str):
     """
@@ -53,16 +67,26 @@ def upsert_table_embedding(table_name: str, explanation_text: str):
 def search_tables(query: str, k: int = 10) -> List[Dict[str, Any]]:
     """
     Searches for tables semantically similar to the query.
-    Returns list of dicts with score, content, and metadata.
+    Retries once on connection errors (Neon AdminShutdown).
     """
-    store = get_vector_store()
-    results = store.similarity_search_with_score(query, k=k)
-    
-    output = []
-    for doc, score in results:
-        output.append({
-            "table_name": doc.metadata.get("table_name"),
-            "explanation": doc.page_content,
-            "score": score
-        })
-    return output
+    for attempt in range(2):
+        try:
+            store = get_vector_store()
+            results = store.similarity_search_with_score(query, k=k)
+
+            output = []
+            for doc, score in results:
+                output.append({
+                    "table_name": doc.metadata.get("table_name"),
+                    "explanation": doc.page_content,
+                    "score": score
+                })
+            return output
+        except Exception as e:
+            if attempt == 0 and "AdminShutdown" in str(e):
+                print(f"  Neon connection was suspended, reconnecting... ({e})")
+                _reset_vector_store()
+                continue
+            raise
+    return []
+

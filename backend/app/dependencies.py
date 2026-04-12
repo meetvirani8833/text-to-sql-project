@@ -14,7 +14,7 @@ def get_postgres_url():
         return f"{base}?ssl={settings.POSTGRES_SSLMODE}"
     return base
 
-engine = create_async_engine(get_postgres_url(), echo=False)
+engine = create_async_engine(get_postgres_url(), echo=False, pool_pre_ping=True, pool_recycle=270)
 AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
 
 async def get_db():
@@ -43,6 +43,16 @@ def get_neo4j_driver():
             auth=(settings.NEO4J_USER, settings.NEO4J_PASSWORD)
         )
     return _neo4j_driver
+
+def reset_neo4j_driver():
+    """Close and invalidate the Neo4j driver singleton so it reconnects on next use."""
+    global _neo4j_driver
+    if _neo4j_driver is not None:
+        try:
+            _neo4j_driver.close()
+        except Exception:
+            pass
+        _neo4j_driver = None
 
 # LangChain LLM & Embeddings
 def get_llm():
