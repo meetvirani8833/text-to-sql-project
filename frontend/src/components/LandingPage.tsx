@@ -12,6 +12,7 @@ import {
     Mail,
 } from 'lucide-react';
 import { ProductShowcase } from './ProductShowcase';
+import { ContactForm } from './ContactForm';
 
 interface LandingPageProps {
     onStartDemo: () => void;
@@ -26,7 +27,7 @@ const fadeUp = {
 
 export function LandingPage({ onStartDemo }: LandingPageProps) {
     return (
-        <div className="min-h-screen bg-[#f4f4f2] text-[#111111] font-sans selection:bg-[#111] selection:text-[#f4f4f2] flex flex-col overflow-x-hidden">
+        <div className="min-h-screen bg-[#f4f4f2] text-[#111111] font-sans selection:bg-[#111] selection:text-[#f4f4f2] flex flex-col">
             <nav className="sticky top-0 z-50 flex items-center justify-between px-6 py-6 border-b border-[#ddddda] bg-[#f4f4f2]/95 backdrop-blur-sm">
                 <a href="#" className="flex items-center space-x-2 font-bold text-2xl tracking-tighter">
                     <span>Dfuse</span>
@@ -48,22 +49,19 @@ export function LandingPage({ onStartDemo }: LandingPageProps) {
                     <a href="#who" className="hover:opacity-60 transition-opacity">
                         Who it&apos;s for
                     </a>
-                    <a href="#contact" className="hover:opacity-60 transition-opacity">
-                        Contact
-                    </a>
                 </div>
 
-                <button
-                    type="button"
-                    onClick={onStartDemo}
-                    className="text-sm font-semibold border-b-[1.5px] border-[#111] pb-0.5 hover:opacity-60 transition-opacity flex items-center space-x-1"
+                <motion.a
+                    href="#contact"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="text-xs font-bold tracking-widest uppercase bg-[#111] text-[#f4f4f2] px-6 py-2.5 rounded-full hover:bg-[#333] transition-colors"
                 >
-                    <span>Try demo</span>
-                    <ArrowRight size={14} />
-                </button>
+                    Contact
+                </motion.a>
             </nav>
 
-            <main className="flex-1 w-full">
+            <main className="flex-1 w-full overflow-x-hidden">
                 {/* Hero - subhead in normal flow so it never overlaps the headline */}
                 <section className="px-6 pt-16 pb-20 md:pt-20 md:pb-24 max-w-7xl mx-auto">
                     <div className="max-w-5xl">
@@ -98,13 +96,12 @@ export function LandingPage({ onStartDemo }: LandingPageProps) {
                             transition={{ duration: 0.6, delay: 0.35 }}
                             className="mt-12 flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-10"
                         >
-                            <button
-                                type="button"
-                                onClick={onStartDemo}
-                                className="bg-[#111] text-[#f4f4f2] px-8 py-4 rounded-full text-sm font-bold tracking-widest uppercase hover:bg-[#333] hover:scale-[1.02] active:scale-[0.98] transition-all w-full sm:w-auto text-center"
+                            <a
+                                href="#showcase"
+                                className="inline-block bg-[#111] text-[#f4f4f2] px-8 py-4 rounded-full text-sm font-bold tracking-widest uppercase hover:bg-[#333] hover:scale-[1.02] active:scale-[0.98] transition-all w-full sm:w-auto text-center"
                             >
-                                Start live demo
-                            </button>
+                                Start Demo
+                            </a>
                             <div className="flex flex-wrap items-center gap-x-8 gap-y-3 text-xs font-bold uppercase tracking-widest text-[#111]">
                                 <span className="flex items-center gap-2">
                                     <Database size={16} strokeWidth={1.75} />
@@ -270,33 +267,29 @@ export function LandingPage({ onStartDemo }: LandingPageProps) {
                 >
                     <motion.div
                         {...fadeUp}
-                        className="rounded-sm border border-[#111] bg-[#111] text-[#f4f4f2] p-10 md:p-14 flex flex-col md:flex-row md:items-center md:justify-between gap-10"
+                        className="rounded-xl border border-[#111] bg-[#111] text-[#f4f4f2] p-8 md:p-12 flex flex-col md:flex-row gap-10 md:gap-14"
                     >
-                        <div>
+                        <div className="flex-1 flex flex-col justify-center">
                             <p className="text-xs font-bold uppercase tracking-widest text-[#aaa] mb-3">Contact</p>
-                            <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
-                                Contact us to see Dfuse on your schema and your toughest questions.
+                            <h2 className="text-3xl md:text-4xl font-bold tracking-tight leading-tight">
+                                Let's build your AI data assistant.
                             </h2>
-                            <p className="mt-4 text-[#ccc] font-medium max-w-xl leading-relaxed">
-                                Try the live demo on a sales database, then talk with us about pilot scope, access controls, and rollout
-                                with your team.
+                            <p className="mt-5 text-[#ccc] font-medium text-lg leading-relaxed max-w-xl">
+                                Curious how Dfuse handles your complex schema? Tell us your requirements, and we'll show you exactly how it can turn your database into answers.
                             </p>
-                        </div>
-                        <div className="flex flex-col sm:flex-row gap-4 shrink-0">
-                            <button
-                                type="button"
-                                onClick={onStartDemo}
-                                className="bg-[#f4f4f2] text-[#111] px-8 py-4 rounded-full text-sm font-bold tracking-widest uppercase hover:bg-white transition-colors"
-                            >
-                                Start live demo
-                            </button>
+                            
                             <a
-                                href="mailto:vmeet062@gmail.com"
-                                className="inline-flex items-center justify-center gap-2 border border-[#555] text-[#f4f4f2] px-8 py-4 rounded-full text-sm font-bold tracking-widest uppercase hover:border-[#888] transition-colors"
+                                href="https://mail.google.com/mail/?view=cm&fs=1&to=ontaraai@gmail.com"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="mt-10 inline-flex items-center gap-2 text-sm font-semibold tracking-widest uppercase text-[#888] hover:text-[#f4f4f2] transition-colors self-start"
                             >
                                 <Mail size={16} />
-                                Email us
+                                Or email us directly
                             </a>
+                        </div>
+                        <div className="flex-1 w-full max-w-md mx-auto md:mx-0">
+                            <ContactForm />
                         </div>
                     </motion.div>
 

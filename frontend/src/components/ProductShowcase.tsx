@@ -28,13 +28,7 @@ const BEATS: Beat[] = [
     {
         id: 'hook',
         headline: 'Ask your data anything.',
-        holdMs: 3000,
-        dark: true,
-    },
-    {
-        id: 'problem',
-        headline: 'Your team waits hours for reports.',
-        subtext: 'What if they didn\'t have to?',
+        subtext: 'Your team waits hours for reports. What if they didn\'t have to?',
         holdMs: 4000,
         dark: true,
     },
@@ -71,8 +65,8 @@ const BEATS: Beat[] = [
     },
     {
         id: 'cta',
-        headline: 'Turn questions into decisions.',
-        subtext: 'See it live.',
+        headline: 'Have custom requirements?',
+        subtext: 'We will build it for you.',
         holdMs: 5000,
         dark: true,
     },
@@ -186,9 +180,8 @@ export function ProductShowcase({ onStartDemo }: ProductShowcaseProps) {
     /* Video ended handler */
     const handleVideoEnded = useCallback(() => {
         if (!isPlaying || isPaused) return;
-        const hold = beat?.holdMs ?? 2000;
-        timerRef.current = setTimeout(goNext, hold);
-    }, [isPlaying, isPaused, beat, goNext]);
+        goNext();
+    }, [isPlaying, isPaused, goNext]);
 
     /* Start the showcase */
     const handleStart = () => {
@@ -309,18 +302,17 @@ export function ProductShowcase({ onStartDemo }: ProductShowcaseProps) {
                         )}
 
                         {/* CTA button on last beat */}
-                        {beat?.id === 'cta' && onStartDemo && (
-                            <motion.button
-                                type="button"
-                                onClick={onStartDemo}
+                        {beat?.id === 'cta' && (
+                            <motion.a
+                                href="#contact"
                                 initial={{ opacity: 0, y: 16 }}
                                 animate={{ opacity: 1, y: 0, transition: { delay: 0.6, duration: 0.5 } }}
                                 whileHover={{ scale: 1.03 }}
                                 whileTap={{ scale: 0.97 }}
-                                className="mt-10 bg-[#f4f4f2] text-[#111] px-10 py-4 rounded-full text-sm font-bold tracking-widest uppercase hover:bg-white transition-colors"
+                                className="mt-10 inline-block bg-[#f4f4f2] text-[#111] px-10 py-4 rounded-full text-sm font-bold tracking-widest uppercase hover:bg-white transition-colors"
                             >
-                                Start live demo
-                            </motion.button>
+                                Contact Us
+                            </motion.a>
                         )}
 
                         {/* Video */}

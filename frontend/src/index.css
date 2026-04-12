@@ -82,3 +82,7 @@ body {
     @apply bg-[#f4f4f2] text-[#111111] antialiased selection:bg-[#111] selection:text-[#f4f4f2];
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
+
+html {
+    scroll-behavior: smooth;
+}
