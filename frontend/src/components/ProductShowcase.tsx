@@ -125,11 +125,7 @@ const videoVariants = {
    COMPONENT
    ────────────────────────────────────────────────────────────── */
 
-interface ProductShowcaseProps {
-    onStartDemo?: () => void;
-}
-
-export function ProductShowcase({ onStartDemo }: ProductShowcaseProps) {
+export function ProductShowcase() {
     const [currentBeat, setCurrentBeat] = useState(-1); // -1 = not started
     const [isPlaying, setIsPlaying] = useState(false);
     const [isPaused, setIsPaused] = useState(false);

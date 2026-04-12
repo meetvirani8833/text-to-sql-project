@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
 import {
-    ArrowRight,
     Database,
     Shield,
     Zap,
@@ -14,10 +13,6 @@ import {
 import { ProductShowcase } from './ProductShowcase';
 import { ContactForm } from './ContactForm';
 
-interface LandingPageProps {
-    onStartDemo: () => void;
-}
-
 const fadeUp = {
     initial: { opacity: 0, y: 24 },
     whileInView: { opacity: 1, y: 0 },
@@ -25,7 +20,7 @@ const fadeUp = {
     transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] as const },
 };
 
-export function LandingPage({ onStartDemo }: LandingPageProps) {
+export function LandingPage() {
     return (
         <div className="min-h-screen bg-[#f4f4f2] text-[#111111] font-sans selection:bg-[#111] selection:text-[#f4f4f2] flex flex-col">
             <nav className="sticky top-0 z-50 flex items-center justify-between px-6 py-6 border-b border-[#ddddda] bg-[#f4f4f2]/95 backdrop-blur-sm">
@@ -124,7 +119,7 @@ export function LandingPage({ onStartDemo }: LandingPageProps) {
 
                 {/* ── Product Showcase / Walkthrough ── */}
                 <section id="showcase" className="scroll-mt-24">
-                    <ProductShowcase onStartDemo={onStartDemo} />
+                    <ProductShowcase />
                 </section>
 
                 <div className="border-t border-[#111] mx-6 max-w-7xl xl:mx-auto" />
