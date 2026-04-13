@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, ChevronLeft, ChevronRight, Pause } from 'lucide-react';
+import { Play, ChevronLeft, ChevronRight, Pause, Loader2 } from 'lucide-react';
+
+/* Collect all video URLs for preloading */
+const VIDEO_URLS: string[] = [];
 
 /* ──────────────────────────────────────────────────────────────
    BEAT DEFINITIONS — the 8-step cinematic script
@@ -72,6 +75,9 @@ const BEATS: Beat[] = [
     },
 ];
 
+// Populate VIDEO_URLS from BEATS
+BEATS.forEach(b => { if (b.video) VIDEO_URLS.push(b.video); });
+
 /* ──────────────────────────────────────────────────────────────
    ANIMATION VARIANTS
    ────────────────────────────────────────────────────────────── */
@@ -129,9 +135,11 @@ export function ProductShowcase() {
     const [currentBeat, setCurrentBeat] = useState(-1); // -1 = not started
     const [isPlaying, setIsPlaying] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
+    const [videoLoading, setVideoLoading] = useState(false);
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const sectionRef = useRef<HTMLDivElement | null>(null);
+    const preloadedRef = useRef(false);
 
     const beat = currentBeat >= 0 && currentBeat < BEATS.length ? BEATS[currentBeat] : null;
 
@@ -179,11 +187,34 @@ export function ProductShowcase() {
         goNext();
     }, [isPlaying, isPaused, goNext]);
 
+    /* Preload all demo videos in the background */
+    const preloadVideos = useCallback(() => {
+        if (preloadedRef.current) return;
+        preloadedRef.current = true;
+        VIDEO_URLS.forEach(url => {
+            const link = document.createElement('link');
+            link.rel = 'preload';
+            link.as = 'video';
+            link.href = url;
+            document.head.appendChild(link);
+        });
+    }, []);
+
+    /* Reset videoLoading whenever the beat changes */
+    useEffect(() => {
+        if (beat?.video) {
+            setVideoLoading(true);
+        } else {
+            setVideoLoading(false);
+        }
+    }, [beat]);
+
     /* Start the showcase */
     const handleStart = () => {
         setCurrentBeat(0);
         setIsPlaying(true);
         setIsPaused(false);
+        preloadVideos();
         // Smooth scroll the showcase to center of viewport
         setTimeout(() => {
             sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -325,10 +356,19 @@ export function ProductShowcase() {
                                         <span className="w-3 h-3 rounded-full bg-[#28c840]" />
                                         <span className="flex-1 mx-3 h-6 rounded-md bg-[#3a3a3a] flex items-center justify-center">
                                             <span className="text-[11px] text-[#888] font-mono">
-                                                dfuse-data.netlify.app
+                                                dfuse.site
                                             </span>
                                         </span>
                                     </div>
+                                    {/* Loading skeleton */}
+                                    {videoLoading && (
+                                        <div className="absolute inset-0 top-[38px] flex items-center justify-center bg-[#1a1a1a] z-10">
+                                            <div className="flex flex-col items-center gap-3">
+                                                <Loader2 size={28} className="animate-spin text-[#555]" />
+                                                <span className="text-xs font-bold uppercase tracking-widest text-[#555]">Loading demo</span>
+                                            </div>
+                                        </div>
+                                    )}
                                     <video
                                         ref={videoRef}
                                         key={beat.video}
@@ -336,6 +376,8 @@ export function ProductShowcase() {
                                         autoPlay
                                         muted
                                         playsInline
+                                        preload="auto"
+                                        onCanPlay={() => setVideoLoading(false)}
                                         onEnded={handleVideoEnded}
                                         className="w-full block"
                                     />
