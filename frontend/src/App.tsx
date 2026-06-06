@@ -12,7 +12,7 @@ function App() {
   const chatState = useChatAPI(PROJECT_ID);
 
   if (currentView === 'landing') {
-    return <LandingPage />;
+    return <LandingPage onStartChat={() => setCurrentView('chat')} />;
   }
 
   return (
