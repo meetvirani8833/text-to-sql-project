@@ -20,7 +20,7 @@ const fadeUp = {
     transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] as const },
 };
 
-export function LandingPage() {
+export function LandingPage({ onStartChat }: { onStartChat?: () => void }) {
     return (
         <div className="min-h-screen bg-[#f4f4f2] text-[#111111] font-sans selection:bg-[#111] selection:text-[#f4f4f2] flex flex-col">
             <nav className="sticky top-0 z-50 flex items-center justify-between px-6 py-6 border-b border-[#ddddda] bg-[#f4f4f2]/95 backdrop-blur-sm">
@@ -46,14 +46,14 @@ export function LandingPage() {
                     </a>
                 </div>
 
-                <motion.a
-                    href="#contact"
+                <motion.button
+                    onClick={onStartChat}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     className="text-xs font-bold tracking-widest uppercase bg-[#111] text-[#f4f4f2] px-6 py-2.5 rounded-full hover:bg-[#333] transition-colors"
                 >
                     Contact
-                </motion.a>
+                </motion.button>
             </nav>
 
             <main className="flex-1 w-full overflow-x-hidden">
