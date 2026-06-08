@@ -106,9 +106,13 @@ def get_embeddings():
     )
 
 # MySQL Introspection
+_mysql_engine = None
+
 def get_mysql_inspector():
-    # Use pymysql sync driver for introspection
-    encoded_password = quote_plus(settings.MYSQL_PASSWORD)
-    url = f"mysql+pymysql://{settings.MYSQL_USER}:{encoded_password}@{settings.MYSQL_HOST}:{settings.MYSQL_PORT}/{settings.MYSQL_DATABASE}"
-    engine = create_engine(url)
-    return inspect(engine)
+    global _mysql_engine
+    if _mysql_engine is None:
+        # Use pymysql sync driver for introspection
+        encoded_password = quote_plus(settings.MYSQL_PASSWORD)
+        url = f"mysql+pymysql://{settings.MYSQL_USER}:{encoded_password}@{settings.MYSQL_HOST}:{settings.MYSQL_PORT}/{settings.MYSQL_DATABASE}"
+        _mysql_engine = create_engine(url)
+    return inspect(_mysql_engine)
