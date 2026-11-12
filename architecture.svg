@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" width="1200" height="720" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<defs><marker id="a-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#58a6ff"/></marker><marker id="a-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#3fb950"/></marker><marker id="a-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#d29922"/></marker><marker id="a-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#bc8cff"/></marker><marker id="a-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#f85149"/></marker><marker id="a-teal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#39c5cf"/></marker><marker id="a-pink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#f778ba"/></marker><marker id="a-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8b949e"/></marker></defs>
+<rect width="1200" height="720" rx="14" fill="#0d1117"/><rect x="0.5" y="0.5" width="1199" height="719" rx="14" fill="none" stroke="#30363d"/>
+<text x="28" y="40" font-size="20" fill="#e6edf3" font-weight="700" text-anchor="start">Text-to-SQL agent architecture</text>
+<text x="28" y="62" font-size="13" fill="#8b949e" font-weight="400" text-anchor="start">An offline knowledge base feeds a LangGraph workflow that builds, checks and runs the SQL</text>
+<rect x="30" y="82" width="1140" height="135" rx="12" fill="#39c5cf" fill-opacity="0.04" stroke="#39c5cf" stroke-opacity="0.45" stroke-dasharray="5 4"/>
+<text x="44" y="104" font-size="11" fill="#39c5cf" font-weight="700" text-anchor="start">OFFLINE: BUILD THE KNOWLEDGE BASE (RUN ONCE, RESUMABLE)</text>
+<rect x="45" y="118" width="430" height="80" rx="9" fill="#161b22" stroke="#39c5cf" stroke-width="1.5"/><rect x="45" y="118" width="5" height="80" rx="2" fill="#39c5cf"/>
+<text x="262.0" y="142" font-size="14" fill="#e6edf3" font-weight="700" text-anchor="middle">rebuild_kb.py</text>
+<text x="262.0" y="161" font-size="11.5" fill="#8b949e" font-weight="400" text-anchor="middle">LLM-written column descriptions → pgvector</text>
+<text x="262.0" y="177" font-size="11.5" fill="#8b949e" font-weight="400" text-anchor="middle">foreign keys → Neo4j  (tables = nodes, FKs = edges)</text>
+<rect x="500" y="118" width="400" height="80" rx="9" fill="#161b22" stroke="#39c5cf" stroke-width="1.5"/><rect x="500" y="118" width="5" height="80" rx="2" fill="#39c5cf"/>
+<text x="702.0" y="142" font-size="14" fill="#e6edf3" font-weight="700" text-anchor="middle">rebuild_entity_kb.py</text>
+<text x="702.0" y="161" font-size="11.5" fill="#8b949e" font-weight="400" text-anchor="middle">values of the columns listed in entities.yaml</text>
+<text x="702.0" y="177" font-size="11.5" fill="#8b949e" font-weight="400" text-anchor="middle">→ embeddings → pgvector</text>
+<rect x="925" y="118" width="230" height="80" rx="9" fill="#161b22" stroke="#39c5cf" stroke-width="1.5"/><rect x="925" y="118" width="5" height="80" rx="2" fill="#39c5cf"/>
+<text x="1042.0" y="142" font-size="14" fill="#e6edf3" font-weight="700" text-anchor="middle">Checkpoints</text>
+<text x="1042.0" y="161" font-size="11.5" fill="#8b949e" font-weight="400" text-anchor="middle">--resume after API timeouts</text>
+<rect x="30" y="235" width="1140" height="470" rx="12" fill="#d29922" fill-opacity="0.04" stroke="#d29922" stroke-opacity="0.45" stroke-dasharray="5 4"/>
+<text x="44" y="257" font-size="11" fill="#d29922" font-weight="700" text-anchor="start">ONLINE: LANGGRAPH WORKFLOW (ONE RUN PER QUESTION)</text>
+<rect x="45" y="285" width="150" height="66" rx="9" fill="#161b22" stroke="#d29922" stroke-width="1.5"/><rect x="45" y="285" width="5" height="66" rx="2" fill="#d29922"/>
+<text x="122.0" y="309" font-size="14" fill="#e6edf3" font-weight="700" text-anchor="middle">rewrite_question</text>
+<text x="122.0" y="328" font-size="11.5" fill="#8b949e" font-weight="400" text-anchor="middle">Action → Target → Filter</text>
+<rect x="235" y="285" width="150" height="66" rx="9" fill="#161b22" stroke="#d29922" stroke-width="1.5"/><rect x="235" y="285" width="5" height="66" rx="2" fill="#d29922"/>
+<text x="312.0" y="309" font-size="14" fill="#e6edf3" font-weight="700" text-anchor="middle">retrieve_tables</text>
+<text x="312.0" y="328" font-size="11.5" fill="#8b949e" font-weight="400" text-anchor="middle">candidate tables</text>
+<text x="312.0" y="344" font-size="11.5" fill="#8b949e" font-weight="400" text-anchor="middle">(pgvector)</text>
+<rect x="425" y="285" width="150" height="66" rx="9" fill="#161b22" stroke="#d29922" stroke-width="1.5"/><rect x="425" y="285" width="5" height="66" rx="2" fill="#d29922"/>
+<text x="502.0" y="309" font-size="14" fill="#e6edf3" font-weight="700" text-anchor="middle">filter_tables</text>
+<text x="502.0" y="328" font-size="11.5" fill="#8b949e" font-weight="400" text-anchor="middle">keep the relevant</text>
+<text x="502.0" y="344" font-size="11.5" fill="#8b949e" font-weight="400" text-anchor="middle">ones (LLM)</text>
+<rect x="615" y="285" width="150" height="66" rx="9" fill="#161b22" stroke="#d29922" stroke-width="1.5"/><rect x="615" y="285" width="5" height="66" rx="2" fill="#d29922"/>
+<text x="692.0" y="309" font-size="14" fill="#e6edf3" font-weight="700" text-anchor="middle">retrieve_metadata</text>
+<text x="692.0" y="328" font-size="11.5" fill="#8b949e" font-weight="400" text-anchor="middle">column docs</text>
+<text x="692.0" y="344" font-size="11.5" fill="#8b949e" font-weight="400" text-anchor="middle">for each table</text>
+<rect x="805" y="285" width="150" height="66" rx="9" fill="#161b22" stroke="#bc8cff" stroke-width="1.5"/><rect x="805" y="285" width="5" height="66" rx="2" fill="#bc8cff"/>
+<text x="882.0" y="309" font-size="14" fill="#e6edf3" font-weight="700" text-anchor="middle">retrieve_join_paths</text>
+<text x="882.0" y="328" font-size="11.5" fill="#8b949e" font-weight="400" text-anchor="middle">shortest JOIN path</text>
+<text x="882.0" y="344" font-size="11.5" fill="#8b949e" font-weight="400" text-anchor="middle">(Neo4j)</text>
+<rect x="995" y="285" width="150" height="66" rx="9" fill="#161b22" stroke="#d29922" stroke-width="1.5"/><rect x="995" y="285" width="5" height="66" rx="2" fill="#d29922"/>
+<text x="1072.0" y="309" font-size="14" fill="#e6edf3" font-weight="700" text-anchor="middle">prune_columns</text>
+<text x="1072.0" y="328" font-size="11.5" fill="#8b949e" font-weight="400" text-anchor="middle">drop irrelevant</text>
+<text x="1072.0" y="344" font-size="11.5" fill="#8b949e" font-weight="400" text-anchor="middle">columns (LLM)</text>
+<path d="M195,318 L235,318" fill="none" stroke="#8b949e" stroke-width="1.6" marker-end="url(#a-gray)"/>
+<path d="M385,318 L425,318" fill="none" stroke="#8b949e" stroke-width="1.6" marker-end="url(#a-gray)"/>
+<path d="M575,318 L615,318" fill="none" stroke="#8b949e" stroke-width="1.6" marker-end="url(#a-gray)"/>
+<path d="M765,318 L805,318" fill="none" stroke="#8b949e" stroke-width="1.6" marker-end="url(#a-gray)"/>
+<path d="M955,318 L995,318" fill="none" stroke="#8b949e" stroke-width="1.6" marker-end="url(#a-gray)"/>
+<text x="880" y="372" font-size="11" fill="#bc8cff" font-weight="600" text-anchor="middle">missing join table? fetch it, then continue</text>
+<path d="M120,351 L120,398 L690,398 L690,420" fill="none" stroke="#8b949e" stroke-width="1.6" marker-end="url(#a-gray)"/>
+<text x="400" y="392" font-size="11" fill="#8b949e" font-weight="400" text-anchor="middle">parallel: pull named values out of the question</text>
+<rect x="615" y="420" width="150" height="66" rx="9" fill="#161b22" stroke="#d29922" stroke-width="1.5"/><rect x="615" y="420" width="5" height="66" rx="2" fill="#d29922"/>
+<text x="692.0" y="444" font-size="14" fill="#e6edf3" font-weight="700" text-anchor="middle">extract_entities</text>
+<text x="692.0" y="463" font-size="11.5" fill="#8b949e" font-weight="400" text-anchor="middle">e.g. "Electronics"</text>
+<rect x="805" y="420" width="340" height="66" rx="9" fill="#161b22" stroke="#f778ba" stroke-width="1.5"/><rect x="805" y="420" width="5" height="66" rx="2" fill="#f778ba"/>
+<text x="977.0" y="444" font-size="14" fill="#e6edf3" font-weight="700" text-anchor="middle">entity_resolution  (subgraph)</text>
+<text x="977.0" y="463" font-size="11.5" fill="#8b949e" font-weight="400" text-anchor="middle">match to real DB values via pgvector</text>
+<text x="977.0" y="479" font-size="11.5" fill="#8b949e" font-weight="400" text-anchor="middle">ambiguous? interrupt() → user picks, run resumes</text>
+<path d="M765,453 L805,453" fill="none" stroke="#8b949e" stroke-width="1.6" marker-end="url(#a-gray)"/>
+<path d="M1070,351 L1070,420" fill="none" stroke="#8b949e" stroke-width="1.6" marker-end="url(#a-gray)"/>
+<rect x="995" y="535" width="150" height="66" rx="9" fill="#161b22" stroke="#d29922" stroke-width="1.5"/><rect x="995" y="535" width="5" height="66" rx="2" fill="#d29922"/>
+<text x="1072.0" y="559" font-size="14" fill="#e6edf3" font-weight="700" text-anchor="middle">generate_query</text>
+<text x="1072.0" y="578" font-size="11.5" fill="#8b949e" font-weight="400" text-anchor="middle">+ domain_rules.yaml</text>
+<text x="1072.0" y="594" font-size="11.5" fill="#8b949e" font-weight="400" text-anchor="middle">+ join path + schema</text>
+<rect x="805" y="535" width="150" height="66" rx="9" fill="#161b22" stroke="#3fb950" stroke-width="1.5"/><rect x="805" y="535" width="5" height="66" rx="2" fill="#3fb950"/>
+<text x="882.0" y="559" font-size="14" fill="#e6edf3" font-weight="700" text-anchor="middle">validate_query</text>
+<text x="882.0" y="578" font-size="11.5" fill="#8b949e" font-weight="400" text-anchor="middle">EXPLAIN on MySQL</text>
+<text x="882.0" y="594" font-size="11.5" fill="#8b949e" font-weight="400" text-anchor="middle">(no data touched)</text>
+<rect x="615" y="535" width="150" height="66" rx="9" fill="#161b22" stroke="#3fb950" stroke-width="1.5"/><rect x="615" y="535" width="5" height="66" rx="2" fill="#3fb950"/>
+<text x="692.0" y="559" font-size="14" fill="#e6edf3" font-weight="700" text-anchor="middle">execute_query</text>
+<text x="692.0" y="578" font-size="11.5" fill="#8b949e" font-weight="400" text-anchor="middle">run on MySQL</text>
+<rect x="425" y="535" width="150" height="66" rx="9" fill="#161b22" stroke="#d29922" stroke-width="1.5"/><rect x="425" y="535" width="5" height="66" rx="2" fill="#d29922"/>
+<text x="502.0" y="559" font-size="14" fill="#e6edf3" font-weight="700" text-anchor="middle">summarize_result</text>
+<text x="502.0" y="578" font-size="11.5" fill="#8b949e" font-weight="400" text-anchor="middle">LLM → chat message</text>
+<rect x="235" y="535" width="150" height="66" rx="9" fill="#161b22" stroke="#58a6ff" stroke-width="1.5"/><rect x="235" y="535" width="5" height="66" rx="2" fill="#58a6ff"/>
+<text x="312.0" y="559" font-size="14" fill="#e6edf3" font-weight="700" text-anchor="middle">Answer</text>
+<text x="312.0" y="578" font-size="11.5" fill="#8b949e" font-weight="400" text-anchor="middle">message + HTML</text>
+<text x="312.0" y="594" font-size="11.5" fill="#8b949e" font-weight="400" text-anchor="middle">result table</text>
+<path d="M1030,486 L1030,535" fill="none" stroke="#8b949e" stroke-width="1.6" marker-end="url(#a-gray)"/>
+<path d="M995,568 L955,568" fill="none" stroke="#8b949e" stroke-width="1.6" marker-end="url(#a-gray)"/>
+<path d="M805,568 L765,568" fill="none" stroke="#8b949e" stroke-width="1.6" marker-end="url(#a-gray)"/>
+<path d="M615,568 L575,568" fill="none" stroke="#8b949e" stroke-width="1.6" marker-end="url(#a-gray)"/>
+<path d="M425,568 L385,568" fill="none" stroke="#8b949e" stroke-width="1.6" marker-end="url(#a-gray)"/>
+<path d="M880,535 L880,512 L1115,512 L1115,535" fill="none" stroke="#f85149" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#a-red)"/>
+<rect x="926.8" y="497" width="146.4" height="16" rx="4" fill="#0d1117"/>
+<text x="1000" y="508" font-size="11" fill="#f85149" font-weight="600" text-anchor="middle">SQL error → regenerate</text>
+<rect x="745" y="640" width="200" height="50" rx="9" fill="#161b22" stroke="#f85149" stroke-width="1.5"/><rect x="745" y="640" width="5" height="50" rx="2" fill="#f85149"/>
+<text x="847.0" y="664" font-size="14" fill="#e6edf3" font-weight="700" text-anchor="middle">fallback</text>
+<text x="847.0" y="683" font-size="11.5" fill="#8b949e" font-weight="400" text-anchor="middle">graceful error message</text>
+<path d="M880,601 L880,640" fill="none" stroke="#f85149" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#a-red)"/>
+<path d="M690,601 L690,620 L790,620 L790,640" fill="none" stroke="#f85149" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#a-red)"/>
+<rect x="694.7" y="603" width="90.60000000000001" height="16" rx="4" fill="#0d1117"/>
+<text x="740" y="614" font-size="11" fill="#f85149" font-weight="600" text-anchor="middle">unrecoverable</text>
+</svg>
