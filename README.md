@@ -2,7 +2,7 @@
 
 **Ask questions about a large, interconnected database in plain English and get validated SQL, results and a readable answer.**
 
-![Text-to-SQL architecture](docs/architecture.svg)
+![Text-to-SQL architecture](/architecture.svg)
 
 ## The problem
 
